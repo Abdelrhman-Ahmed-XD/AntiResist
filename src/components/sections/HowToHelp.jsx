@@ -5,7 +5,7 @@ const roles = ["Doctors", "Pharmacists", "Nurses", "Laboratory"];
 
 const responsibilities = {
   Doctors: [
-    { title: "Verify bacterial indication", desc: "Prescribe antibiotics only when there is clear evidence of a bacterial infection — not for viral illnesses." },
+    { title: "Verify bacterial indication", desc: "Prescribe antibiotics only when there is clear evidence of a bacterial infection  not for viral illnesses." },
     { title: "Culture before empiric therapy", desc: "Send blood, urine, or wound cultures before starting antibiotics whenever clinically feasible." },
     { title: "De-escalate based on results", desc: "Narrow antibiotic coverage once culture and sensitivity results are available." },
     { title: "Document indication & duration", desc: "Record the indication, chosen agent, dose, and planned duration clearly in the patient's notes." },
@@ -18,7 +18,7 @@ const responsibilities = {
   ],
   Nurses: [
     { title: "Administer on schedule", desc: "Ensure antibiotics are given at the correct intervals to maintain therapeutic drug levels." },
-    { title: "Monitor for adverse effects", desc: "Observe for allergic reactions, C. difficile symptoms, and treatment failures — report promptly." },
+    { title: "Monitor for adverse effects", desc: "Observe for allergic reactions, C. difficile symptoms, and treatment failures  report promptly." },
     { title: "Enforce infection control", desc: "Follow hand hygiene, PPE, and isolation protocols rigorously to prevent transmission of resistant organisms." },
     { title: "Reinforce patient education", desc: "Remind patients to complete their full antibiotic course and not to share medication with others." },
   ],
@@ -52,7 +52,7 @@ const aware = [
 ];
 
 const tips = [
-  { title: "Complete the full course", desc: "Never stop antibiotics early even if you feel better — incomplete courses allow resistant bacteria to survive." },
+  { title: "Complete the full course", desc: "Never stop antibiotics early even if you feel better  incomplete courses allow resistant bacteria to survive." },
   { title: "Never self-prescribe", desc: "Always consult a licensed healthcare professional before starting antibiotic therapy." },
   { title: "Culture first when possible", desc: "Send specimens for culture and sensitivity before starting antibiotics to enable targeted therapy." },
   { title: "De-escalate to targeted therapy", desc: "Switch from broad-spectrum to narrow-spectrum agents as soon as culture results are available." },
@@ -74,7 +74,7 @@ export default function HowToHelp() {
         </div>
 
         <h2 className="text-3xl sm:text-4xl font-semibold text-dark mb-4">
-          How you can help — antibiotic stewardship
+          How you can help  antibiotic stewardship
         </h2>
         <p className="text-secondary leading-relaxed max-w-2xl mb-12">
           Antibiotic Stewardship (AMS) is a coordinated programme that promotes the appropriate

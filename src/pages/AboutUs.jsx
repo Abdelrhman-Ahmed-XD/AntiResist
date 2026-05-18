@@ -17,7 +17,7 @@ const MISSION_POINTS = [
   {
     icon: HeartHandshake,
     title: "Our approach",
-    desc: "We unite healthcare professionals behind a shared public commitment — making stewardship visible, peer-driven, and tied to real clinical practice rather than policy alone.",
+    desc: "We unite healthcare professionals behind a shared public commitment  making stewardship visible, peer-driven, and tied to real clinical practice rather than policy alone.",
   },
 ];
 
@@ -29,8 +29,7 @@ const PILLARS = [
 ];
 
 const TEAM = [
-  { name: "Abdelrhman Ahmed",   role: "Project Lead & Developer",    initials: "AA", color: "bg-primary" },
-  { name: "Campaign Team",      role: "Content & Clinical Review",   initials: "CT", color: "bg-teal"    },
+  { name: "Campaign Team",      role: "Content & Clinical Review",   initials: "CT", color: "bg-teal"    },{ name: "Campaign Team",      role: "Content & Clinical Review",   initials: "CT", color: "bg-teal"    },{ name: "Campaign Team",      role: "Content & Clinical Review",   initials: "CT", color: "bg-teal"    },{ name: "Campaign Team",      role: "Content & Clinical Review",   initials: "CT", color: "bg-teal"    },{ name: "Campaign Team",      role: "Content & Clinical Review",   initials: "CT", color: "bg-teal"    },{ name: "Campaign Team",      role: "Content & Clinical Review",   initials: "CT", color: "bg-teal"    },{ name: "Campaign Team",      role: "Content & Clinical Review",   initials: "CT", color: "bg-teal"    },
 ];
 
 export default function AboutUs() {
@@ -51,7 +50,7 @@ export default function AboutUs() {
             </h1>
             <p className="text-secondary leading-relaxed max-w-2xl text-lg mb-8">
               Antimicrobial resistance is one of the most urgent health threats of our time.
-              In Egypt — where ESBL rates exceed 85 % and MDR organisms are routine in ICUs —
+              In Egypt  where ESBL rates exceed 85 % and MDR organisms are routine in ICUs
               the gap between knowledge and practice must close now. AntiResist is our answer.
             </p>
             <div className="flex flex-wrap gap-4">
@@ -97,7 +96,7 @@ export default function AboutUs() {
                   The problem we're solving
                 </h2>
                 <p className="text-secondary leading-relaxed mb-4">
-                  Globally, antimicrobial resistance caused 1.27 million deaths in 2019 — more than
+                  Globally, antimicrobial resistance caused 1.27 million deaths in 2019  more than
                   HIV/AIDS or malaria. By 2050, projections put that figure at 10 million annually
                   if current trends continue.
                 </p>
@@ -110,7 +109,7 @@ export default function AboutUs() {
                 <p className="text-secondary leading-relaxed">
                   The drivers are well-understood: over-prescribing, self-medication, inadequate
                   stewardship programmes, and weak enforcement of prescription-only policies.
-                  These are solvable — and healthcare professionals are the key lever.
+                  These are solvable  and healthcare professionals are the key lever.
                 </p>
               </div>
 

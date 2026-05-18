@@ -11,7 +11,7 @@ export default function Hero() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
-          {/* Left — text */}
+          {/* Left  text */}
           <div className="flex flex-col gap-6">
             {/* Badge chip */}
             <span className="inline-flex items-center gap-2 self-start bg-teal/10 text-teal text-sm font-medium px-4 py-1.5 rounded-full">
@@ -52,7 +52,7 @@ export default function Hero() {
             </p>
           </div>
 
-          {/* Right — image */}
+          {/* Right  image */}
           <div className="relative">
             <div className="rounded-2xl overflow-hidden shadow-lg aspect-[4/3] lg:aspect-[3/2]">
               <img

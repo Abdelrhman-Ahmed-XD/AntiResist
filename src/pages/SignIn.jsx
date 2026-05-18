@@ -19,7 +19,7 @@ export default function SignIn() {
   const [loading, setLoading]     = useState(false);
   const [resetting, setResetting] = useState(false);
 
-  // Already signed in — redirect away
+  // Already signed in redirect away
   if (user) {
     navigate(`/profile/${user.uid}`, { replace: true });
     return null;
@@ -68,7 +68,7 @@ export default function SignIn() {
     setResetting(true);
     try {
       await resetPassword(email.trim());
-      toast.success("Password reset email sent — check your inbox.");
+      toast.success("Password reset email sent check your inbox.");
     } catch {
       toast.error("Could not send reset email. Check the address and try again.");
     } finally {

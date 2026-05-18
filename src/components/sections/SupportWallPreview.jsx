@@ -32,7 +32,7 @@ const MOCK_SUPPORTERS = [
     name: "Dr. Omar Saleh",
     specialty: "Doctor",
     workplace: "Mansoura University Hospital",
-    comment: "Culture before empiric therapy is not a luxury — it is the standard of care.",
+    comment: "Culture before empiric therapy is not a luxury  it is the standard of care.",
     createdAt: "2024-04-02",
   },
   {

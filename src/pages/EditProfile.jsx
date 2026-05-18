@@ -158,7 +158,7 @@ export default function EditProfile() {
               </Field>
 
               {/* Comment */}
-              <Field label="Your message" hint="Optional — shown on your public profile" error={errors.comment}>
+              <Field label="Your message" hint="Optional shown on your public profile" error={errors.comment}>
                 <textarea
                   rows={4}
                   placeholder="Why does fighting AMR matter to you?"

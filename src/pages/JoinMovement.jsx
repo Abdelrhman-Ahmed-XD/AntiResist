@@ -184,7 +184,7 @@ export default function JoinMovement() {
               </Field>
 
               {/* Comment (optional) */}
-              <Field label="Your message" hint="Optional — shown on your public profile" error={errors.comment}>
+              <Field label="Your message" hint="Optional  shown on your public profile" error={errors.comment}>
                 <textarea
                   rows={3}
                   placeholder="Why does fighting AMR matter to you?"

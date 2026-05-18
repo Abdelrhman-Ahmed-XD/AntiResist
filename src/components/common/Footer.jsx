@@ -43,7 +43,7 @@ export default function Footer() {
             </Link>
             <p className="text-gray-400 text-sm leading-relaxed max-w-sm mb-6">
               A healthcare awareness campaign dedicated to promoting rational antibiotic
-              use and combating antimicrobial resistance across Egypt — one prescription at a time.
+              use and combating antimicrobial resistance across Egypt  one prescription at a time.
             </p>
             <div className="flex items-center gap-3">
               {SOCIALS.map(({ icon: Icon, href, label }) => (

@@ -8,7 +8,7 @@ const causes = [
   },
   {
     n: 2,
-    title: "Misuse — wrong dose or duration",
+    title: "Misuse  wrong dose or duration",
     desc: "Incomplete courses, incorrect dosing, or stopping treatment early allows partially resistant bacteria to survive and multiply.",
   },
   {
@@ -48,7 +48,7 @@ export default function RationalUse() {
           Most common causes of antibiotic resistance
         </h2>
         <p className="text-secondary leading-relaxed max-w-2xl mb-12">
-          Resistance does not arise randomly — it is driven by specific, preventable behaviours
+          Resistance does not arise randomly  it is driven by specific, preventable behaviours
           in healthcare, agriculture, and the community.
         </p>
 

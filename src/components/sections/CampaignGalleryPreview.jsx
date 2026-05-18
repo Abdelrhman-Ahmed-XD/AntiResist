@@ -6,25 +6,25 @@ const GALLERY_IMAGES = [
     id: "1",
     src: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&q=80",
     alt: "Healthcare team in hospital corridor",
-    caption: "Stewardship Round — Cairo University Hospitals, March 2024",
+    caption: "Stewardship Round  Cairo University Hospitals, March 2024",
   },
   {
     id: "2",
     src: "https://images.unsplash.com/photo-1530026405186-ed1f139313f8?w=600&q=80",
     alt: "Pharmacist counselling patient",
-    caption: "Patient Counselling Workshop — Ain Shams, April 2024",
+    caption: "Patient Counselling Workshop  Ain Shams, April 2024",
   },
   {
     id: "3",
     src: "https://images.unsplash.com/photo-1582560474992-385ebb9b46f8?w=600&q=80",
     alt: "Medical students in lecture hall",
-    caption: "AMR Awareness Lecture — Faculty of Medicine, April 2024",
+    caption: "AMR Awareness Lecture  Faculty of Medicine, April 2024",
   },
   {
     id: "4",
     src: "https://images.unsplash.com/photo-1631815588090-d1bcbe9a8539?w=600&q=80",
     alt: "Laboratory technician at microscope",
-    caption: "Microbiology Lab — Culture & Sensitivity Reporting",
+    caption: "Microbiology Lab  Culture & Sensitivity Reporting",
   },
 ];
 

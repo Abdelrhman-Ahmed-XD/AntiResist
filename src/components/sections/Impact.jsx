@@ -67,7 +67,7 @@ export default function Impact() {
           Impact of AMR on healthcare systems
         </h2>
         <p className="text-secondary leading-relaxed max-w-2xl mb-12">
-          Resistant infections affect every area of the hospital — driving up costs,
+          Resistant infections affect every area of the hospital  driving up costs,
           lengthening stays, and limiting treatment options across all specialties.
         </p>
 

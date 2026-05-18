@@ -19,7 +19,7 @@ export function AuthProvider({ children }) {
         // Skip Firestore on token refreshes for the same user
         if (firebaseUser.uid !== checkedUid.current) {
           checkedUid.current = firebaseUser.uid;
-          // Admins are stored as /admins/{uid} — one read, no collection scan
+          // Admins are stored as /admins/{uid}  one read, no collection scan
           const snap = await getDoc(doc(db, "admins", firebaseUser.uid));
           setIsAdmin(snap.exists());
         }
