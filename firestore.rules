@@ -1,0 +1,55 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Admins must be stored as documents keyed by UID:
+    //   /admins/{uid}  →  { email: "admin@example.com" }
+    // This allows an O(1) existence check without a collection query.
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // ── supporters ───────────────────────────────────────────────────────────
+    match /supporters/{docId} {
+
+      // Public profiles are readable by anyone
+      allow read: if true;
+
+      // A signed-in user may create exactly one supporter doc tied to their uid
+      allow create: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasAll(["uid", "name", "specialty", "createdAt"])
+        && request.resource.data.name  is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.specialty is string;
+
+      // Owner may edit their own profile; admins may edit any
+      allow update: if isSignedIn() && (
+        resource.data.uid == request.auth.uid ||
+        isAdmin()
+      );
+
+      // Only admins may delete supporter documents
+      allow delete: if isAdmin();
+    }
+
+    // ── gallery ──────────────────────────────────────────────────────────────
+    match /gallery/{docId} {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
+
+    // ── admins ───────────────────────────────────────────────────────────────
+    // Authenticated users may read (to resolve their own admin status).
+    // No client may write — manage admins via the Firebase console only.
+    match /admins/{docId} {
+      allow read:  if isSignedIn();
+      allow write: if false;
+    }
+  }
+}
