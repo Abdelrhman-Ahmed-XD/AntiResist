@@ -1,6 +1,8 @@
 import {
   collection,
   doc,
+  setDoc,
+  getDoc,
   addDoc,
   getDocs,
   updateDoc,
@@ -12,6 +14,29 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "./config";
+
+// ── User Profiles ───────────────────────────────────────────────────────────
+
+export async function createUserProfile(uid, data) {
+  return setDoc(doc(db, "userProfiles", uid), {
+    uid,
+    points: 0,
+    completedActions: [],
+    badges: [],
+    certificates: [],
+    ...data,
+    createdAt: serverTimestamp(),
+  });
+}
+
+export async function getUserProfile(uid) {
+  const snap = await getDoc(doc(db, "userProfiles", uid));
+  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+}
+
+export async function updateUserProfile(uid, data) {
+  return updateDoc(doc(db, "userProfiles", uid), data);
+}
 
 // ── Supporters ──────────────────────────────────────────────────────────────
 

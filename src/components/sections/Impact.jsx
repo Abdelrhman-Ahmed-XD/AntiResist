@@ -1,4 +1,12 @@
 import { Globe, BedDouble, Scissors, Activity } from "lucide-react";
+import { motion } from "framer-motion";
+
+const GRAD = {
+  background: "linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+  backgroundClip: "text",
+};
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
   ResponsiveContainer, Cell,
@@ -54,40 +62,52 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 export default function Impact() {
   return (
-    <section id="impact" className="bg-bg py-20">
+    <section id="impact" className="py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        {/* Badge */}
-        <div className="flex items-center gap-2 text-sm font-medium text-teal mb-4">
-          <Globe size={16} strokeWidth={1.5} />
-          Point 3
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }} transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {/* Badge */}
+          <div className="flex items-center gap-2 text-sm font-semibold mb-4" style={GRAD}>
+            <Globe size={16} strokeWidth={1.5} />
+            Point 3
+          </div>
 
-        <h2 className="text-3xl sm:text-4xl font-semibold text-dark mb-4">
-          Impact of AMR on healthcare systems
-        </h2>
-        <p className="text-secondary leading-relaxed max-w-2xl mb-12">
-          Resistant infections affect every area of the hospital  driving up costs,
-          lengthening stays, and limiting treatment options across all specialties.
-        </p>
+          <h2 className="text-3xl sm:text-4xl font-semibold text-dark mb-4">
+            Impact of AMR on healthcare systems
+          </h2>
+          <p className="text-secondary leading-relaxed max-w-2xl mb-12">
+            Resistant infections affect every area of the hospital — driving up costs,
+            lengthening stays, and limiting treatment options across all specialties.
+          </p>
+        </motion.div>
 
         {/* Impact cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-16">
           {impactCards.map(({ icon: Icon, title, points }) => (
-            <div key={title} className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-                <Icon size={20} strokeWidth={1.5} className="text-primary" />
+            <motion.div
+              key={title}
+              className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6"
+              whileHover={{ y: -5, boxShadow: "0 12px 40px rgba(37,99,235,0.13)", borderColor: "rgba(37,99,235,0.22)" }}
+              transition={{ type: "spring", stiffness: 300, damping: 28 }}
+            >
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
+                style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.12), rgba(37,99,235,0.12))", border: "1px solid rgba(124,58,237,0.2)" }}>
+                <Icon size={20} strokeWidth={1.5} style={{ color: "#7C3AED" }} />
               </div>
               <p className="font-semibold text-dark mb-3">{title}</p>
               <ul className="space-y-2">
                 {points.map((pt) => (
                   <li key={pt} className="text-sm text-secondary flex gap-2">
-                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-teal flex-shrink-0" />
+                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full flex-shrink-0"
+                      style={{ background: "linear-gradient(135deg,#7C3AED,#2563EB)" }} />
                     {pt}
                   </li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           ))}
         </div>
 
@@ -137,11 +157,22 @@ export default function Impact() {
         </p>
 
         {/* Reference */}
-        <div className="text-xs text-secondary border border-gray-100 rounded-xl p-4">
-          <strong className="text-dark">Reference:</strong> Saber S, et al. (2023). Antimicrobial resistance
-          patterns in Egyptian hospitals: a systematic review. <em>Journal of Global Antimicrobial Resistance</em>;
-          Karam G, et al. (2016). Antimicrobial resistance threats in the 21st century. <em>Journal of Global Antimicrobial Resistance</em>, 6, 1–3.
-        </div>
+        <motion.div
+          className="rounded-xl p-4 text-xs text-secondary flex gap-3 items-start shadow-sm"
+          style={{ background: "linear-gradient(180deg,#7C3AED,#2563EB) 0 0 / 3px 100% no-repeat, white", border: "1px solid rgba(124,58,237,0.15)", borderLeft: "none" }}
+          whileHover={{ boxShadow: "0 8px 28px rgba(124,58,237,0.12)", scale: 1.01 }}
+          transition={{ duration: 0.25 }}
+        >
+          <span className="shrink-0 mt-0.5 w-4 h-4 rounded-full flex items-center justify-center text-white text-[9px] font-bold"
+            style={{ background: "linear-gradient(135deg,#7C3AED,#2563EB)" }}>
+            R
+          </span>
+          <span>
+            <strong className="text-dark">Reference:</strong> Saber S, et al. (2023). Antimicrobial resistance
+            patterns in Egyptian hospitals: a systematic review. <em>Journal of Global Antimicrobial Resistance</em>;
+            Karam G, et al. (2016). Antimicrobial resistance threats in the 21st century. <em>Journal of Global Antimicrobial Resistance</em>, 6, 1–3.
+          </span>
+        </motion.div>
       </div>
     </section>
   );

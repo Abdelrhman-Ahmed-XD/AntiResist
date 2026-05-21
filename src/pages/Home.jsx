@@ -5,23 +5,29 @@ import WhatIsAMR from "../components/sections/WhatIsAMR";
 import RationalUse from "../components/sections/RationalUse";
 import Impact from "../components/sections/Impact";
 import HowToHelp from "../components/sections/HowToHelp";
-import SupportWallPreview from "../components/sections/SupportWallPreview";
-import CampaignGalleryPreview from "../components/sections/CampaignGalleryPreview";
+import SDGSection from "../components/sections/SDGSection";
+import VSSplitSection from "../components/sections/VSSplitSection";
+import HomeParticles from "../components/sections/HomeParticles";
 
 export default function Home() {
   return (
     <>
       <Navbar />
-      <main>
-        <Hero />
-        <WhatIsAMR />
-        <RationalUse />
-        <Impact />
-        <HowToHelp />
-        <SupportWallPreview />
-        <CampaignGalleryPreview />
-      </main>
-      <Footer />
+      <div className="relative" style={{ overflowX: "clip" }}>
+        <HomeParticles />
+        <div className="relative z-10">
+          <main>
+            <Hero />
+            <WhatIsAMR />
+            <RationalUse />
+            <Impact />
+            <HowToHelp />
+            <SDGSection />
+            <VSSplitSection />
+          </main>
+          <Footer />
+        </div>
+      </div>
     </>
   );
 }
