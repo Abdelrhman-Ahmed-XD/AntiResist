@@ -16,7 +16,6 @@ import { auth } from "../firebase/config";
 
 // Pre-load at module level so the download click stays synchronous (mobile Chrome requires it)
 const _certImg = new Image();
-_certImg.crossOrigin = "anonymous";
 _certImg.src = "/certificate.jpg";
 
 function downloadCertificate(name, filename = "AntiResist-Certificate.png") {
@@ -149,7 +148,7 @@ export default function Profile() {
       <>
         <Navbar />
         <div className="relative" style={{ overflowX: "clip", minHeight: "100vh" }}>
-          <HomeParticles repel={false} />
+          <HomeParticles repel={false} minimal />
           <div className="relative z-10 flex items-center justify-center" style={{ minHeight: "100vh" }}>
             <Loader2 size={32} className="animate-spin text-purple-500" />
           </div>
@@ -168,7 +167,7 @@ export default function Profile() {
       <>
         <Navbar />
         <div className="relative" style={{ overflowX: "clip", minHeight: "100vh" }}>
-          <HomeParticles repel={false} />
+          <HomeParticles repel={false} minimal />
           <div className="relative z-10 flex items-center justify-center px-4" style={{ minHeight: "100vh" }}>
             <motion.div
               className="text-center max-w-sm"
@@ -219,7 +218,7 @@ export default function Profile() {
     <>
       <Navbar />
       <div className="relative" style={{ overflowX: "clip", minHeight: "100vh" }}>
-        <HomeParticles repel={false} />
+        <HomeParticles repel={false} minimal />
 
         <div className="relative z-10 py-28 px-4 flex justify-center">
           <motion.div

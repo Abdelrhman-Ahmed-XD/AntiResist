@@ -203,25 +203,44 @@ export default function Footer() {
               >
                 <span style={{ color: "#1877F2" }}><FacebookIcon /></span>
               </a>
-              <DevelopedBy />
+              <span className="hidden sm:block"><DevelopedBy /></span>
             </div>
           </div>
 
-          {/* Nav columns */}
-          {NAV_SECTIONS.map(({ heading, links }) => (
-            <div key={heading}>
+          {/* Nav columns — site links + portal links side by side */}
+          <div className="sm:col-span-2 lg:col-span-2 flex gap-0">
+            {/* Site links */}
+            <div className="flex-1">
               <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "#9CA3AF" }}>
-                {heading}
+                {NAV_SECTIONS[0].heading}
               </p>
               <ul className="space-y-3">
-                {links.map(({ label, href, anchor }) => (
-                  <li key={label}>
-                    <FooterLink label={label} href={href} anchor={anchor} />
-                  </li>
+                {NAV_SECTIONS[0].links.map(({ label, href, anchor }) => (
+                  <li key={label}><FooterLink label={label} href={href} anchor={anchor} /></li>
                 ))}
               </ul>
             </div>
-          ))}
+
+            {/* Vertical divider */}
+            <div className="w-px mx-8 self-stretch" style={{ background: "rgba(124,58,237,0.12)" }} />
+
+            {/* Portal links */}
+            <div className="flex-1">
+              <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: "#9CA3AF" }}>
+                {NAV_SECTIONS[1].heading}
+              </p>
+              <ul className="space-y-3">
+                {NAV_SECTIONS[1].links.map(({ label, href, anchor }) => (
+                  <li key={label}><FooterLink label={label} href={href} anchor={anchor} /></li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* Developed by — mobile only, below nav columns */}
+          <div className="flex sm:hidden justify-center">
+            <DevelopedBy />
+          </div>
         </div>
 
         {/* Divider + copyright */}

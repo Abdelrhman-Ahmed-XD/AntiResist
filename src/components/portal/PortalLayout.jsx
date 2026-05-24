@@ -53,6 +53,7 @@ export default function PortalLayout() {
           style={{ background: 'rgba(7,7,26,0.6)' }}>
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 mb-10">
+              {/* Brand column */}
               <div>
                 <p className="text-white font-bold text-base mb-2 tracking-tight">AntiResist</p>
                 <p className="text-slate-500 text-xs leading-relaxed max-w-[200px] mb-3">
@@ -76,7 +77,7 @@ export default function PortalLayout() {
                     href="https://www.linkedin.com/in/abdelrhman-ahmed-fathy2004"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group inline-flex items-center gap-1.5"
+                    className="group hidden sm:inline-flex items-center gap-1.5"
                   >
                     <span style={{ color: '#0077B5' }}><LinkedInIcon /></span>
                     <span className="text-xs text-slate-500 group-hover:text-slate-400 transition-colors duration-200">Developed by</span>
@@ -84,29 +85,48 @@ export default function PortalLayout() {
                   </a>
                 </div>
               </div>
-              <div>
-                <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest mb-4">Portal</p>
-                <ul className="space-y-2.5">
-                  {PORTAL_LINKS.map(({ label, href }) => (
-                    <li key={href}>
-                      <Link to={href} className="text-slate-500 hover:text-violet-400 text-sm transition-colors duration-200">
-                        {label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+
+              {/* Portal + Site nav side by side with divider */}
+              <div className="sm:col-span-2 flex gap-0">
+                <div className="flex-1">
+                  <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest mb-4">Portal</p>
+                  <ul className="space-y-2.5">
+                    {PORTAL_LINKS.map(({ label, href }) => (
+                      <li key={href}>
+                        <Link to={href} className="text-slate-500 hover:text-violet-400 text-sm transition-colors duration-200">
+                          {label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="w-px mx-8 self-stretch" style={{ background: 'rgba(167,139,250,0.15)' }} />
+                <div className="flex-1">
+                  <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest mb-4">Site</p>
+                  <ul className="space-y-2.5">
+                    {SITE_LINKS.map(({ label, to }) => (
+                      <li key={to}>
+                        <Link to={to} className="text-slate-500 hover:text-violet-400 text-sm transition-colors duration-200">
+                          {label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-              <div>
-                <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest mb-4">Site</p>
-                <ul className="space-y-2.5">
-                  {SITE_LINKS.map(({ label, to }) => (
-                    <li key={to}>
-                      <Link to={to} className="text-slate-500 hover:text-violet-400 text-sm transition-colors duration-200">
-                        {label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+
+              {/* Developed by — mobile only, below nav columns */}
+              <div className="flex sm:hidden justify-center">
+                <a
+                  href="https://www.linkedin.com/in/abdelrhman-ahmed-fathy2004"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex items-center gap-1.5"
+                >
+                  <span style={{ color: '#0077B5' }}><LinkedInIcon /></span>
+                  <span className="text-xs text-slate-500 group-hover:text-slate-400 transition-colors duration-200">Developed by</span>
+                  <span className="text-xs font-medium text-slate-400 group-hover:text-slate-300 transition-colors duration-200">Abdelrhman Ahmed</span>
+                </a>
               </div>
             </div>
             <div className="h-px w-full mb-6"

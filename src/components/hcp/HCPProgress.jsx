@@ -41,7 +41,6 @@ const BADGES = [
 
 // Pre-load at module level so the download click stays synchronous (mobile Chrome requires it)
 const _certImg = new Image();
-_certImg.crossOrigin = 'anonymous';
 _certImg.src = '/certificate.jpg';
 
 function downloadCertificate(name) {

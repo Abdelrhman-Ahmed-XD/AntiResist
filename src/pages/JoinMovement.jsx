@@ -229,7 +229,7 @@ export default function JoinMovement() {
     <>
       <Navbar />
       <div className="relative" style={{ overflowX: "clip", minHeight: "100vh" }}>
-        <HomeParticles repel={false} />
+        <HomeParticles repel={false} minimal />
         <div className="relative z-10 py-28 px-4 flex justify-center">
           <motion.div
             className="w-full max-w-lg"

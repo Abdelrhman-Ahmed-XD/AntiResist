@@ -222,7 +222,7 @@ export default function SignIn() {
       <>
         <Navbar />
         <div className="relative flex items-center justify-center" style={{ minHeight: "100vh" }}>
-          <HomeParticles repel={false} />
+          <HomeParticles repel={false} minimal />
           <div className="relative z-10 flex flex-col items-center gap-4">
             <Loader2 size={36} className="animate-spin text-purple-500" />
             <p className="text-sm text-gray-500 font-medium">Signing you in…</p>
@@ -238,7 +238,7 @@ export default function SignIn() {
       <Navbar />
       <div className="relative flex items-center justify-center px-4"
         style={{ overflowX: "clip", minHeight: "100vh", paddingTop: "6rem", paddingBottom: "6rem" }}>
-        <HomeParticles repel={false} />
+        <HomeParticles repel={false} minimal />
         <motion.div className="relative z-10 w-full max-w-md"
           initial={{ opacity: 0, y: 36, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}

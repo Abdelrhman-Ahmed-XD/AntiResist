@@ -10,7 +10,7 @@
  *
  * Each element flees the mouse cursor smoothly via spring physics.
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 
 /* ── Spring config ── */
@@ -346,7 +346,7 @@ function BacteriaStrep({ id, size = 72, color = '#38BDF8', count = 5 }) {
 /* ══════════════════════════════════════════════════════════
    Per-particle spring repulsion wrapper
 ══════════════════════════════════════════════════════════ */
-function Particle({ mouseRef, style, children, animateProps, duration, delay = 0 }) {
+function Particle({ mouseRef, style, children, animateProps, duration, delay = 0, repel = true }) {
   const elRef = useRef(null);
 
   const mx = useMotionValue(0);
@@ -355,6 +355,7 @@ function Particle({ mouseRef, style, children, animateProps, duration, delay = 0
   const sy = useSpring(my, SPRING_CFG);
 
   useEffect(() => {
+    if (!repel) return;
     let rafId;
     const tick = () => {
       const el = elRef.current;
@@ -379,7 +380,7 @@ function Particle({ mouseRef, style, children, animateProps, duration, delay = 0
     };
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-  }, [mx, my, mouseRef]);
+  }, [mx, my, mouseRef, repel]);
 
   return (
     <motion.div
@@ -447,20 +448,76 @@ const BLUE_PILLS = [
   { id: 'p5', left:'43%', top:'2%',  rotate:'74deg',  w:56, h:22, c1:'#2563EB', c2:'#60A5FA', anim:{ y:[0,-19,0], rotate:['74deg','69deg','74deg']  }, dur:4.8 },
 ];
 
+/* Minimal sets — 2 pills + 3 bacteria for mobile */
+const MINIMAL_PILLS = [
+  { id: 'mp1', left:'5%',  top:'8%',  rotate:'-36deg', w:56, h:22, c1:'#7C3AED', c2:'#A78BFA', anim:{ y:[0,-14,0] }, dur:5.2 },
+  { id: 'mp2', left:'86%', top:'58%', rotate:'52deg',  w:50, h:20, c1:'#6D28D9', c2:'#8B5CF6', anim:{ y:[0,-11,0] }, dur:7.4 },
+];
+const MINIMAL_PILLS_BLUE = [
+  { id: 'mp1', left:'5%',  top:'8%',  rotate:'-36deg', w:56, h:22, c1:'#1D4ED8', c2:'#60A5FA', anim:{ y:[0,-14,0] }, dur:5.2 },
+  { id: 'mp2', left:'86%', top:'58%', rotate:'52deg',  w:50, h:20, c1:'#1D4ED8', c2:'#3B82F6', anim:{ y:[0,-11,0] }, dur:7.4 },
+];
+const MINIMAL_BACTERIA = [
+  { id:'mb1', type:'cocci',  left:'3%',  top:'32%', rotate:'-8deg', size:44, anim:{ y:[0,-12,0] }, dur:8.2,  delay:0   },
+  { id:'mb2', type:'rod',    left:'87%', top:'18%', rotate:'14deg', size:66, anim:{ y:[0,-10,0] }, dur:9.1,  delay:0.5 },
+  { id:'mb3', type:'vibrio', left:'50%', top:'72%', rotate:'30deg', size:50, anim:{ y:[0,-14,0] }, dur:6.4,  delay:2.0 },
+];
+
 /* ══════════════════════════════════════════════════════════
    Main export
 ══════════════════════════════════════════════════════════ */
 export default function FloatingParticles({ containerRef, purple = false, blue = false }) {
   const mouseRef = useRef({ x: -9999, y: -9999 });
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches
+  );
 
   useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)');
+    const handler = (e) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) return;
     const el = containerRef?.current ?? document;
     const onMove  = (e) => { mouseRef.current = { x: e.clientX, y: e.clientY }; };
     const onLeave = () =>  { mouseRef.current = { x: -9999, y: -9999 }; };
     el.addEventListener('mousemove', onMove);
     el.addEventListener('mouseleave', onLeave);
     return () => { el.removeEventListener('mousemove', onMove); el.removeEventListener('mouseleave', onLeave); };
-  }, [containerRef]);
+  }, [containerRef, isMobile]);
+
+  if (isMobile) {
+    const mobilePills = blue ? MINIMAL_PILLS_BLUE : MINIMAL_PILLS;
+    const mobileBacteriaColors = blue ? BLUE_PALETTE : PURPLE_PALETTE;
+    return (
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+        {mobilePills.map(({ id, left, top, rotate, w, h, c1, c2, anim, dur }) => (
+          <Particle key={id} mouseRef={mouseRef} style={{ left, top }}
+            animateProps={{ ...anim }} duration={dur} repel={false}>
+            <div style={{ rotate, display:'inline-block', opacity: 0.55 }}>
+              <PillSVG w={w} h={h} c1={c1} c2={c2} id={id} />
+            </div>
+          </Particle>
+        ))}
+        {MINIMAL_BACTERIA.map(({ id, type, left, top, rotate, size, anim, dur, delay }, i) => {
+          const c = mobileBacteriaColors[i % mobileBacteriaColors.length];
+          return (
+            <Particle key={id} mouseRef={mouseRef} style={{ left, top }}
+              animateProps={anim} duration={dur} delay={delay} repel={false}>
+              <div style={{ rotate, display:'inline-block', opacity: 0.45 }}>
+                {type === 'cocci'  && <BacteriaCocci  id={id} size={size} color={c} />}
+                {type === 'rod'    && <BacteriaRod     id={id} size={size} color={c} />}
+                {type === 'vibrio' && <BacteriaVibrio  id={id} size={size} color={c} />}
+              </div>
+            </Particle>
+          );
+        })}
+      </div>
+    );
+  }
 
   const activePills = blue ? BLUE_PILLS : PILLS;
 

@@ -16,7 +16,7 @@
  * Rest of page (top 20-100%): opacity 0.16 — sparser, subtle
  * All particles repel the mouse cursor via spring physics.
  */
-import { memo, useEffect, useRef } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 
 const REPEL_RADIUS = 145;
@@ -467,6 +467,18 @@ const HERO_ITEMS = [
   { id:'hb22', type:'corona', left:'50%', top:'17%', rot:'-20deg', sz:52 },
 ];
 
+/* MINIMAL set — 8 particles for auth/profile pages (mobile performance) */
+const MINIMAL_ITEMS = [
+  { id:'mn1', type:'pill',   left:'5%',  top:'4%',  rot:'-35deg', sz:52 },
+  { id:'mn2', type:'cocci',  left:'88%', top:'6%',  rot:'10deg',  sz:42 },
+  { id:'mn3', type:'spore',  left:'3%',  top:'38%', rot:'0deg',   sz:26 },
+  { id:'mn4', type:'pill',   left:'91%', top:'36%', rot:'28deg',  sz:48 },
+  { id:'mn5', type:'rod',    left:'6%',  top:'70%', rot:'20deg',  sz:56 },
+  { id:'mn6', type:'spiky',  left:'89%', top:'68%', rot:'-20deg', sz:46 },
+  { id:'mn7', type:'spore',  left:'47%', top:'86%', rot:'0deg',   sz:24 },
+  { id:'mn8', type:'vibrio', left:'50%', top:'14%', rot:'25deg',  sz:50 },
+];
+
 /* PAGE zone — top 22-100%, moderate opacity (0.30), well spread */
 const PAGE_ITEMS = [
   // WhatIsAMR (~22-34%)
@@ -531,9 +543,23 @@ const FLOATS = [
    Main export
    repel (default true) — enables mouse-repel RAF loops.
    Pass repel={false} on non-home pages for much lower CPU.
+   minimal (default false) — forces reduced particle set.
+   On mobile (≤768 px) minimal mode is applied automatically.
 ══════════════════════════════════════════════════════════ */
-export default memo(function HomeParticles({ repel = true }) {
+export default memo(function HomeParticles({ repel = true, minimal = false }) {
   const mouseRef = useRef({ x: -9999, y: -9999 });
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)');
+    const handler = (e) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  const useMinimal = minimal || isMobile;
 
   useEffect(() => {
     if (!repel) return; // no mouse tracking needed without repel
@@ -546,6 +572,25 @@ export default memo(function HomeParticles({ repel = true }) {
       document.removeEventListener('mouseleave', onLeave);
     };
   }, [repel]);
+
+  if (useMinimal) {
+    return (
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true" style={{ zIndex: 0 }}>
+        {MINIMAL_ITEMS.map(({ id, type, left, top, rot, sz }, idx) => {
+          const color = colorForLeft(left);
+          const { y, dur, delay } = FLOATS[idx % FLOATS.length];
+          return (
+            <Particle key={id} mouseRef={mouseRef} style={{ left, top }} opacity={0.28}
+              animateProps={{ y }} duration={dur} delay={delay} repel={false}>
+              <div style={{ rotate: rot, display: 'inline-block' }}>
+                {renderBacteria(type, id, sz, color)}
+              </div>
+            </Particle>
+          );
+        })}
+      </div>
+    );
+  }
 
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true" style={{ zIndex: 0 }}>
