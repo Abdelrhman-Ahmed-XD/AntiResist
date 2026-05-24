@@ -6,10 +6,10 @@ export default function PatientPortal() {
   return (
     <>
       <HeroPortal />
+      <PortalDashboard />
       <div className="border-t border-purple-900/30" style={{ background: 'rgba(7,7,26,0.4)' }}>
         <InfoModules />
       </div>
-      <PortalDashboard />
     </>
   );
 }

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Target, Eye, HeartHandshake, Shield } from "lucide-react";
+import { Target, Eye, HeartHandshake, Shield, Users, GraduationCap } from "lucide-react";
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
 import HomeParticles from "../components/sections/HomeParticles";
@@ -50,6 +50,38 @@ const CARDS = [
 
 const fadeUp  = { hidden: { opacity: 0, y: 28 }, show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } } };
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.13 } } };
+const staggerFast = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
+
+const TEAM = [
+  "Alaa Fadel Yousef",
+  "Abdelrahman Zaki Mohamed",
+  "Abdullah Elsayed Elbakry",
+  "Ahmed Radwan Erfan",
+  "Ahmed Elzanati Ahmed",
+  "Akmal Magdy Mahfouz",
+  "Alaa Ebrahim Awad",
+  "Ahmed Hisham Fawzy",
+  "Mohamed Youness Mohamed",
+  "Ali Hussein Abbas Taha",
+];
+
+const AVATAR_GRADIENTS = [
+  "linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%)",
+  "linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)",
+  "linear-gradient(135deg, #4338CA 0%, #0891B2 100%)",
+  "linear-gradient(135deg, #6D28D9 0%, #2563EB 100%)",
+  "linear-gradient(135deg, #1D4ED8 0%, #4338CA 100%)",
+  "linear-gradient(135deg, #7C3AED 0%, #0891B2 100%)",
+  "linear-gradient(135deg, #4338CA 0%, #7C3AED 100%)",
+  "linear-gradient(135deg, #2563EB 0%, #6D28D9 100%)",
+  "linear-gradient(135deg, #0891B2 0%, #2563EB 100%)",
+  "linear-gradient(135deg, #6D28D9 0%, #4338CA 100%)",
+];
+
+function getInitials(name) {
+  const parts = name.split(" ");
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
 
 const GLASS = {
   background: "rgba(255,255,255,0.86)",
@@ -127,6 +159,89 @@ export default function AboutUs() {
                   <p className="text-sm leading-relaxed" style={{ color: "#6B7280" }}>{desc}</p>
                 </motion.div>
               ))}
+            </motion.div>
+
+            {/* ── Team Members ─────────────────────────────────────── */}
+            <motion.div
+              className="mb-14"
+              initial={{ opacity: 0, y: 28 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.08 }}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {/* Section header */}
+              <div className="text-center mb-10">
+                <div
+                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-4"
+                  style={{ background: "rgba(124,58,237,0.10)", border: "1px solid rgba(124,58,237,0.26)", ...GRAD_TEXT }}
+                >
+                  <Users size={14} strokeWidth={1.8} />
+                  Our Team
+                </div>
+                <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight" style={{ color: "#1A2233" }}>
+                  The people behind{" "}
+                  <span style={GRAD_TEXT}>AntiResist</span>
+                </h2>
+              </div>
+
+              {/* Supervisor card */}
+              <motion.div
+                className="mb-8 flex justify-center"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+              >
+                <div
+                  className="inline-flex flex-col sm:flex-row items-center gap-4 px-8 py-5 rounded-2xl"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(251,191,36,0.10) 0%, rgba(245,158,11,0.08) 100%)",
+                    border: "1px solid rgba(251,191,36,0.30)",
+                    boxShadow: "0 4px 24px rgba(251,191,36,0.10)",
+                  }}
+                >
+                  <div
+                    className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ background: "linear-gradient(135deg, #F59E0B 0%, #D97706 100%)", boxShadow: "0 4px 16px rgba(245,158,11,0.35)" }}
+                  >
+                    <GraduationCap size={24} strokeWidth={1.6} color="white" />
+                  </div>
+                  <div className="text-center sm:text-left">
+                    <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "#D97706" }}>
+                      Under Supervision
+                    </p>
+                    <p className="text-lg font-bold" style={{ color: "#1A2233" }}>Dr. Rehab Hamed</p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Team grid */}
+              <motion.div
+                className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4"
+                variants={staggerFast}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.08 }}
+              >
+                {TEAM.map((name, i) => (
+                  <motion.div
+                    key={name}
+                    variants={fadeUp}
+                    className="flex flex-col items-center text-center p-5 rounded-2xl cursor-default"
+                    style={GLASS}
+                    whileHover={{ y: -5, boxShadow: "0 16px 40px rgba(124,58,237,0.16), 0 2px 8px rgba(0,0,0,0.05)" }}
+                    transition={{ duration: 0.22 }}
+                  >
+                    <div
+                      className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-sm mb-3 shrink-0"
+                      style={{ background: AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length], boxShadow: "0 4px 12px rgba(124,58,237,0.28)" }}
+                    >
+                      {getInitials(name)}
+                    </div>
+                    <p className="text-sm font-semibold leading-snug" style={{ color: "#1A2233" }}>{name}</p>
+                  </motion.div>
+                ))}
+              </motion.div>
             </motion.div>
 
             {/* ── Facebook CTA ──────────────────────────────────────── */}

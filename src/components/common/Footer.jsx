@@ -54,7 +54,6 @@ const NAV_SECTIONS = [
     links: [
       { label: "Patient Portal",          href: "/portal",  anchor: null },
       { label: "Healthcare Professional", href: "/hcp",     anchor: null },
-      { label: "Join the Movement",       href: "/join",    anchor: null },
       { label: "About Us",                href: "/about",   anchor: null },
     ],
   },
