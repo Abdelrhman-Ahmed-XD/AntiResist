@@ -7,7 +7,8 @@ import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
 import HomeParticles from "../components/sections/HomeParticles";
 import { signUp, updateDisplayName } from "../firebase/auth";
-import { addSupporter, createUserProfile } from "../firebase/firestore";
+import { addSupporter, createUserProfile, incrementSupporters } from "../firebase/firestore";
+import { STATS_CACHE_KEY } from "../components/sections/Hero";
 
 const GRAD = {
   background: "linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)",
@@ -208,6 +209,9 @@ export default function JoinMovement() {
         console.warn("Could not save profile data:", fsErr.message);
       }
 
+      await incrementSupporters();
+      // Bust the stats cache so the homepage shows the updated supporters count
+      try { localStorage.removeItem(STATS_CACHE_KEY); } catch {}
       toast.success("Welcome to AntiResist!");
       navigate(from || `/profile/${user.uid}`);
     } catch (err) {

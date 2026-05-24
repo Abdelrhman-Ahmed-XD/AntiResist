@@ -49,6 +49,8 @@ export function GamificationProvider({ children }) {
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
+        // Discard any stale guest-session pending writes before loading real data
+        pendingRef.current = null;
         setUid(firebaseUser.uid);
         try {
           const profile = await getUserProfile(firebaseUser.uid);
@@ -63,6 +65,7 @@ export function GamificationProvider({ children }) {
           console.error('[Gamification] failed to load profile:', err);
         }
       } else {
+        pendingRef.current = null;
         setUid(null);
         setState({ points: 0, done: new Set() });
         setUserName('');

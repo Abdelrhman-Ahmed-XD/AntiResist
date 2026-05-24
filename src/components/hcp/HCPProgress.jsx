@@ -39,41 +39,35 @@ const BADGES = [
   },
 ];
 
-async function downloadCertificate(name) {
+// Pre-load at module level so the download click stays synchronous (mobile Chrome requires it)
+const _certImg = new Image();
+_certImg.crossOrigin = 'anonymous';
+_certImg.src = '/certificate.jpg';
+
+function downloadCertificate(name) {
+  if (!_certImg.complete || !_certImg.naturalWidth) return;
   const displayName = (name?.trim()) || 'Stewardship Professional';
 
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  await new Promise((resolve, reject) => {
-    img.onload = resolve;
-    img.onerror = reject;
-    img.src = '/certificate.jpg';
-  });
-
   const canvas = document.createElement('canvas');
-  canvas.width  = img.naturalWidth;
-  canvas.height = img.naturalHeight;
-
+  canvas.width  = _certImg.naturalWidth;
+  canvas.height = _certImg.naturalHeight;
   const ctx = canvas.getContext('2d');
-  ctx.drawImage(img, 0, 0);
+  ctx.drawImage(_certImg, 0, 0);
 
-  const fontSize = Math.round(img.naturalHeight * 0.058);
+  const fontSize = Math.round(_certImg.naturalHeight * 0.058);
   ctx.font         = `700 ${fontSize}px 'Times New Roman', Georgia, serif`;
   ctx.fillStyle    = '#1a3a5c';
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(displayName, img.naturalWidth / 2, img.naturalHeight * 0.405);
+  ctx.fillText(displayName, _certImg.naturalWidth / 2, _certImg.naturalHeight * 0.405);
 
-  canvas.toBlob((blob) => {
-    const url = URL.createObjectURL(blob);
-    const a   = document.createElement('a');
-    a.href     = url;
-    a.download = 'AntiResist-HCP-Certificate.png';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, 'image/png');
+  const dataUrl = canvas.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href     = dataUrl;
+  a.download = 'AntiResist-HCP-Certificate.png';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 const badgeVariant = {

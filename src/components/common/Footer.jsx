@@ -31,6 +31,14 @@ function LinkedInIcon() {
   );
 }
 
+function FacebookIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+    </svg>
+  );
+}
+
 const NAV_SECTIONS = [
   {
     heading: "Learn",
@@ -123,7 +131,7 @@ export default function Footer() {
           {/* Brand column */}
           <div className="lg:col-span-2">
             <Link to="/" onClick={scrollToTop}
-              className="flex items-center gap-2 mb-4">
+              className="flex items-center gap-2 mb-3">
               <svg width="26" height="26" viewBox="0 0 28 28" fill="none" aria-hidden="true">
                 <defs>
                   <clipPath id="ft-shield-l"><rect x="0" y="0" width="14" height="28" /></clipPath>
@@ -176,12 +184,27 @@ export default function Footer() {
               </span>
             </Link>
 
-            <p className="text-sm leading-relaxed max-w-sm mb-5" style={{ color: "#6B7280" }}>
+            <p className="text-sm leading-relaxed max-w-sm mb-4" style={{ color: "#6B7280" }}>
               A healthcare awareness campaign dedicated to promoting rational antibiotic
               use and combating antimicrobial resistance across Egypt  one prescription at a time.
             </p>
 
-            <DevelopedBy />
+            <div className="flex flex-col gap-2">
+              <a
+                href="https://www.facebook.com/share/1BfcnpPXWD/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Follow us on Facebook"
+                className="inline-flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-200 hover:scale-105"
+                style={{
+                  background: "linear-gradient(135deg, rgba(124,58,237,0.08) 0%, rgba(37,99,235,0.08) 100%)",
+                  border: "1.5px solid rgba(124,58,237,0.25)",
+                }}
+              >
+                <span style={{ color: "#1877F2" }}><FacebookIcon /></span>
+              </a>
+              <DevelopedBy />
+            </div>
           </div>
 
           {/* Nav columns */}

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BookOpen, Brain, Sparkles, Activity, Pill, Star, ChevronRight } from 'lucide-react';
+import { BookOpen, Sparkles, Activity, Pill, Star, ChevronRight } from 'lucide-react';
 
 const CARDS = [
   {
@@ -11,15 +11,6 @@ const CARDS = [
     accent: '#00C2A8',
     glow: 'rgba(0,194,168,0.18)',
     badge: 'Learn',
-  },
-  {
-    icon: Brain,
-    title: 'Patient Quiz',
-    desc: 'Test your antibiotic knowledge with 10 interactive questions and earn points.',
-    href: '/portal/quiz',
-    accent: '#A78BFA',
-    glow: 'rgba(167,139,250,0.18)',
-    badge: 'Quiz',
   },
   {
     icon: Sparkles,

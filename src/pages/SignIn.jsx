@@ -209,17 +209,12 @@ export default function SignIn() {
   const [waitingForAuth, setWaitingForAuth] = useState(false);
 
   useEffect(() => {
-    if (user && waitingForAuth) {
+    if (!user) return;
+    if (waitingForAuth) {
       toast.success("Welcome back!");
-      navigate(from || `/profile/${user.uid}`, { replace: true });
     }
-  }, [user, waitingForAuth, from, navigate]);
-
-  // Already logged in on mount
-  if (user && !waitingForAuth) {
     navigate(from || `/profile/${user.uid}`, { replace: true });
-    return null;
-  }
+  }, [user, waitingForAuth, from, navigate]);
 
   // Show a clean loading screen while waiting for AuthContext to set user
   if (waitingForAuth) {

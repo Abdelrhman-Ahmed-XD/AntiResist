@@ -3,6 +3,7 @@ import {
   doc,
   setDoc,
   getDoc,
+  getDocFromServer,
   addDoc,
   getDocs,
   updateDoc,
@@ -12,6 +13,7 @@ import {
   where,
   limit,
   serverTimestamp,
+  increment,
 } from "firebase/firestore";
 // Note: updateUserProfile uses setDoc+merge so it creates the doc if absent
 import { db } from "./config";
@@ -70,6 +72,35 @@ export async function updateSupporter(docId, data) {
 
 export async function deleteSupporter(docId) {
   return deleteDoc(doc(db, "supporters", docId));
+}
+
+// ── Site Stats ──────────────────────────────────────────────────────────────
+
+const STATS_REF = () => doc(db, 'stats', 'global');
+
+const VISITORS_BASE  = 438; // display = 438 + firestoreCount  →  starts at 439
+const SUPPORTERS_BASE = 199; // display = 199 + firestoreCount  →  starts at 200
+
+export async function getStats() {
+  try {
+    const snap = await getDocFromServer(STATS_REF());
+    const d = snap.exists() ? snap.data() : {};
+    return {
+      supporters: SUPPORTERS_BASE + (d.supporters ?? 1),
+      visitors:   VISITORS_BASE   + (d.visitors   ?? 1),
+    };
+  } catch (e) {
+    console.error('[stats] getStats failed:', e.code, e.message);
+    return { supporters: 200, visitors: 439 };
+  }
+}
+
+export function incrementSupporters() {
+  return setDoc(STATS_REF(), { supporters: increment(1) }, { merge: true });
+}
+
+export function incrementVisitors() {
+  return setDoc(STATS_REF(), { visitors: increment(1) }, { merge: true }).catch(() => {});
 }
 
 // ── Gallery ─────────────────────────────────────────────────────────────────

@@ -1,6 +1,28 @@
-import { Users, LayoutGrid } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Users, LayoutGrid, Globe } from "lucide-react";
 import { motion } from "framer-motion";
 import ShieldScene from "../portal/ShieldScene";
+import { getStats, incrementVisitors } from "../../firebase/firestore";
+
+export const STATS_CACHE_KEY = 'ar_stats_v3';
+const CACHE_KEY = STATS_CACHE_KEY;
+const CACHE_TTL = 30 * 1000;
+// Shared across StrictMode's double-invoke so both runs wait for the same increment
+let _incrementPromise = null;
+
+function readCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const { data, ts } = JSON.parse(raw);
+    if (Date.now() - ts > CACHE_TTL) return null;
+    return data;
+  } catch { return null; }
+}
+
+function writeCache(data) {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: Date.now() })); } catch {}
+}
 
 const fadeUp  = { hidden: { opacity: 0, y: 32 }, show: { opacity: 1, y: 0, transition: { duration: 0.60, ease: [0.22, 1, 0.36, 1] } } };
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.13 } } };
@@ -14,6 +36,28 @@ const GRAD_TEXT = {
 };
 
 export default function Hero() {
+  const [stats, setStats] = useState(() => readCache() ?? { supporters: 200, visitors: 439 });
+
+
+  useEffect(() => {
+    let live = true;
+
+    // Both StrictMode runs share the same promise so both wait for the increment
+    if (!_incrementPromise) {
+      _incrementPromise = incrementVisitors();
+    }
+
+    _incrementPromise
+      .then(() => getStats())
+      .then(fresh => {
+        if (!live) return;
+        writeCache(fresh);
+        setStats(fresh);
+      });
+
+    return () => { live = false; };
+  }, []);
+
   function scrollTo(id) {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   }
@@ -95,19 +139,39 @@ export default function Hero() {
               <button
                 onClick={() => scrollTo("what-is-amr")}
                 className="inline-flex items-center justify-center font-semibold px-6 py-3 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-                style={{ background: "rgba(124,58,237,0.08)", border: "1.5px solid rgba(124,58,237,0.35)", color: "#7C3AED" }}
-                onMouseEnter={e => { e.currentTarget.style.background = "rgba(124,58,237,0.14)"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = "rgba(124,58,237,0.08)"; }}
+                style={{ background: "rgba(124,58,237,0.10)", border: "1.5px solid rgba(124,58,237,0.55)", color: "#6D28D9" }}
+                onMouseEnter={e => { e.currentTarget.style.background = "rgba(124,58,237,0.18)"; e.currentTarget.style.borderColor = "rgba(124,58,237,0.80)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = "rgba(124,58,237,0.10)"; e.currentTarget.style.borderColor = "rgba(124,58,237,0.55)"; }}
               >
                 Learn More
               </button>
             </motion.div>
 
             {/* Social proof */}
-            <motion.p variants={fadeUp} className="flex items-center gap-2 text-sm text-secondary">
-              <Users size={16} strokeWidth={1.5} style={{ color: "#7C3AED" }} />
-              Joined by 482+ healthcare professionals
-            </motion.p>
+            <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-3">
+              <span
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium"
+                style={{
+                  background: "linear-gradient(135deg, rgba(124,58,237,0.08) 0%, rgba(37,99,235,0.08) 100%)",
+                  border: "1px solid rgba(124,58,237,0.18)",
+                  color: "#6B7280",
+                }}
+              >
+                <Users size={15} strokeWidth={1.5} style={{ color: "#7C3AED" }} />
+                <span><strong style={{ color: "#374151" }}>{stats.supporters.toLocaleString()}+</strong> healthcare professionals</span>
+              </span>
+              <span
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium"
+                style={{
+                  background: "linear-gradient(135deg, rgba(37,99,235,0.08) 0%, rgba(124,58,237,0.08) 100%)",
+                  border: "1px solid rgba(37,99,235,0.18)",
+                  color: "#6B7280",
+                }}
+              >
+                <Globe size={15} strokeWidth={1.5} style={{ color: "#2563EB" }} />
+                <span><strong style={{ color: "#374151" }}>{stats.visitors.toLocaleString()}+</strong> website visitors</span>
+              </span>
+            </motion.div>
           </motion.div>
 
           {/* Right — ShieldScene */}
