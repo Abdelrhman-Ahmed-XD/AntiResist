@@ -137,7 +137,7 @@ export default function PortalNavbar() {
               <NavShieldIcon />
             </motion.div>
             <span className="text-white font-bold text-lg tracking-tight">
-              Anti<span className="text-purple-400">Resist</span>
+              <span className="text-purple-400">Anti</span>Resist
             </span>
           </Link>
 
