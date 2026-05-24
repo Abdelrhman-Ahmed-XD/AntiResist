@@ -8,8 +8,8 @@ const MODULES = [
     color: 'text-violet-400',
     glow: 'rgba(139,92,246,0.4)',
     content: [
-      { label: 'Viral Infections',   text: 'Caused by viruses — influenza, common cold, COVID-19. Antibiotics have absolutely no effect on viruses. Using them anyway only harms your microbiome and promotes resistance.' },
-      { label: 'Bacterial Infections', text: 'Caused by bacteria — Streptococcus (strep throat), E. coli (UTIs), Staphylococcus (skin infections). Antibiotics are specifically designed to target and kill bacteria. This is where they work.' },
+      { label: 'Viral Infections',   text: 'Caused by viruses such as influenza, common cold, and COVID-19. Antibiotics have absolutely no effect on viruses. Using them anyway only harms your microbiome and promotes resistance.' },
+      { label: 'Bacterial Infections', text: 'Caused by bacteria such as Streptococcus (strep throat), E. coli (UTIs), and Staphylococcus (skin infections). Antibiotics are specifically designed to target and kill bacteria. This is where they work.' },
     ],
   },
   {
@@ -18,8 +18,8 @@ const MODULES = [
     color: 'text-red-400',
     glow: 'rgba(239,68,68,0.35)',
     content: [
-      { label: 'Immediate Risks',       text: 'Taking antibiotics unnecessarily can trigger allergic reactions, severe GI upset, and destroy beneficial gut bacteria — weakening your immune defenses.' },
-      { label: 'Long-term Consequences', text: 'Every misuse accelerates antimicrobial resistance (AMR). Bacteria evolve and adapt, making future infections — even routine ones — potentially untreatable.' },
+      { label: 'Immediate Risks',       text: 'Taking antibiotics unnecessarily can trigger allergic reactions, severe GI upset, and destroy beneficial gut bacteria, weakening your immune defenses.' },
+      { label: 'Long-term Consequences', text: 'Every misuse accelerates antimicrobial resistance (AMR). Bacteria evolve and adapt, making future infections, even routine ones, potentially untreatable.' },
     ],
   },
   {
@@ -28,7 +28,7 @@ const MODULES = [
     color: 'text-amber-400',
     glow: 'rgba(251,191,36,0.35)',
     content: [
-      { label: 'The Mechanism',   text: 'When bacteria are repeatedly exposed to antibiotics, weaker strains die — but naturally resistant mutants survive. They multiply and become the dominant strain.' },
+      { label: 'The Mechanism',   text: 'When bacteria are repeatedly exposed to antibiotics, weaker strains die while naturally resistant mutants survive. They multiply and become the dominant strain.' },
       { label: 'Resistance Spreads', text: "Resistant bacteria transfer resistance genes to other bacteria (even unrelated species) via plasmids. One person's misuse can seed resistance across a community." },
     ],
   },
@@ -38,8 +38,8 @@ const MODULES = [
     color: 'text-emerald-400',
     glow: 'rgba(52,211,153,0.35)',
     content: [
-      { label: 'Wrong Drug, Wrong Dose', text: 'Every antibiotic targets specific bacteria. Sharing means taking the wrong drug for your infection — guaranteeing treatment failure while wiping out healthy bacteria.' },
-      { label: 'Incomplete Treatment',   text: "Shared antibiotics are rarely a full course. Stopping early — or taking only part of someone else's supply — leaves the strongest bacteria alive to rebound and spread." },
+      { label: 'Wrong Drug, Wrong Dose', text: 'Every antibiotic targets specific bacteria. Sharing means taking the wrong drug for your infection, guaranteeing treatment failure while wiping out healthy bacteria.' },
+      { label: 'Incomplete Treatment',   text: "Shared antibiotics are rarely a full course. Stopping early, or taking only part of someone else's supply, leaves the strongest bacteria alive to rebound and spread." },
     ],
   },
 ];

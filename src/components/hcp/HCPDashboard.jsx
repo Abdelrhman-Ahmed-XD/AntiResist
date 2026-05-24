@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShieldCheck, Brain, Stethoscope, Microscope, TrendingUp, ChevronRight } from 'lucide-react';
+import { ShieldCheck, Brain, Stethoscope, Microscope, ChevronRight } from 'lucide-react';
 
 const CARDS = [
   {
@@ -34,14 +34,6 @@ const CARDS = [
     href: '/hcp/trends',
     accent: '#F97316',
     badge: 'Epidemiology',
-  },
-  {
-    icon: TrendingUp,
-    title: 'AMR Burden Data',
-    desc: 'Global statistics: 700k deaths/year, 10M projected by 2050, critical antibiotic pipeline.',
-    href: '/hcp',
-    accent: '#EF4444',
-    badge: 'Statistics',
   },
 ];
 
@@ -77,7 +69,7 @@ export default function HCPDashboard() {
         </motion.div>
 
         <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
           initial="hidden"
           whileInView="show"
           viewport={{ once: true }}

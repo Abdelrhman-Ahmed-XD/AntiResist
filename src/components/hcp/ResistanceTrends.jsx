@@ -7,28 +7,28 @@ const DATA = {
     color: '#EF4444',
     desc: 'Most common pathogen in UTIs and intra-abdominal infections. High ampicillin and fluoroquinolone resistance in Egypt.',
     rates: {
-      'Ampicillin':                    { r: 76, note: 'Extensively resistant — avoid empirically' },
+      'Ampicillin':                    { r: 76, note: 'Extensively resistant, avoid empirically' },
       'Ciprofloxacin':                 { r: 53, note: 'High resistance; fluoroquinolone-sparing recommended' },
       'Trimethoprim-Sulfamethoxazole': { r: 48, note: 'Check local antibiogram before use' },
       'Ceftriaxone':                   { r: 38, note: 'ESBL-mediated resistance increasing' },
       'Piperacillin-Tazobactam':       { r: 24, note: 'Active against most non-ESBL strains' },
       'Nitrofurantoin':                { r: 12, note: 'Remains active for uncomplicated UTI' },
-      'Meropenem':                     { r: 8,  note: 'Reserve — use only for ESBL/carbapenem indication' },
-      'Colistin':                      { r: 2,  note: 'Last resort — preserved in Egypt for now' },
+      'Meropenem':                     { r: 8,  note: 'Reserve, use only for ESBL/carbapenem indication' },
+      'Colistin':                      { r: 2,  note: 'Last resort, preserved in Egypt for now' },
     },
   },
   'Klebsiella pneumoniae': {
     color: '#F97316',
     desc: 'Major nosocomial pathogen. High ESBL and carbapenem resistance in Egyptian hospitals, especially ICUs.',
     rates: {
-      'Ampicillin':              { r: 96, note: 'Intrinsically resistant — never use' },
+      'Ampicillin':              { r: 96, note: 'Intrinsically resistant, never use' },
       'Ceftriaxone':             { r: 62, note: 'ESBL prevalence very high in hospital isolates' },
-      'Ciprofloxacin':           { r: 47, note: 'Significant resistance — confirm sensitivity' },
-      'Piperacillin-Tazobactam': { r: 35, note: 'Some ESBL strains hydrolysis — confirm MIC' },
-      'Meropenem':               { r: 22, note: 'CR-Kp emerging — critical concern in Egypt ICUs' },
+      'Ciprofloxacin':           { r: 47, note: 'Significant resistance, confirm sensitivity' },
+      'Piperacillin-Tazobactam': { r: 35, note: 'Some ESBL strains hydrolysis, confirm MIC' },
+      'Meropenem':               { r: 22, note: 'CR-Kp emerging, critical concern in Egypt ICUs' },
       'Imipenem':                { r: 20, note: 'Monitor carbapenem resistance closely' },
       'Colistin':                { r: 5,  note: 'Last resort; mcr-gene resistance emerging' },
-      'Tigecycline':             { r: 8,  note: 'Option for MDR strains — not for bacteraemia' },
+      'Tigecycline':             { r: 8,  note: 'Option for MDR strains, not for bacteraemia' },
     },
   },
   'Staphylococcus aureus': {
@@ -40,9 +40,9 @@ const DATA = {
       'Clindamycin':              { r: 34, note: 'Check D-zone test for inducible resistance' },
       'Ciprofloxacin':            { r: 31, note: 'Co-resistance with MRSA common' },
       'Trimethoprim-Sulfamethoxazole': { r: 18, note: 'Option for CA-MRSA skin infections' },
-      'Tetracycline':             { r: 22, note: 'Moderate resistance — confirm sensitivity' },
-      'Vancomycin':               { r: 0,  note: '100% susceptible — VRSA not reported in Egypt' },
-      'Linezolid':                { r: 0,  note: 'Fully active — reserve for serious MRSA' },
+      'Tetracycline':             { r: 22, note: 'Moderate resistance, confirm sensitivity' },
+      'Vancomycin':               { r: 0,  note: '100% susceptible, VRSA not reported in Egypt' },
+      'Linezolid':                { r: 0,  note: 'Fully active, reserve for serious MRSA' },
     },
   },
   'Pseudomonas aeruginosa': {
@@ -53,7 +53,7 @@ const DATA = {
       'Piperacillin-Tazobactam': { r: 29, note: 'Active for many strains; confirm MIC' },
       'Ceftazidime':             { r: 31, note: 'Monitor for MBL/AmpC resistance' },
       'Cefepime':                { r: 28, note: 'Anti-pseudomonal cephalosporin; useful if susceptible' },
-      'Meropenem':               { r: 21, note: 'Preferred for serious infection — extended infusion preferred' },
+      'Meropenem':               { r: 21, note: 'Preferred for serious infection, extended infusion preferred' },
       'Imipenem':                { r: 24, note: 'Higher intrinsic resistance than meropenem' },
       'Amikacin':                { r: 14, note: 'Synergistic combination; TDM mandatory' },
       'Colistin':                { r: 5,  note: 'Last resort for XDR strains' },
@@ -64,13 +64,13 @@ const DATA = {
     desc: 'Extremely resistant nosocomial pathogen. Carbapenem-resistant Acinetobacter is endemic in many Egyptian hospitals.',
     rates: {
       'Ciprofloxacin':           { r: 79, note: 'Pan-resistant to fluoroquinolones in most hospital isolates' },
-      'Ceftriaxone':             { r: 88, note: 'No meaningful activity — do not use' },
-      'Piperacillin-Tazobactam': { r: 74, note: 'High resistance — avoid empirically in hospitals' },
+      'Ceftriaxone':             { r: 88, note: 'No meaningful activity, do not use' },
+      'Piperacillin-Tazobactam': { r: 74, note: 'High resistance, avoid empirically in hospitals' },
       'Imipenem':                { r: 68, note: 'Carbapenem-resistant Acinetobacter (CRAB) widely prevalent' },
-      'Meropenem':               { r: 66, note: 'CRAB — mandatory ID consultation' },
-      'Amikacin':                { r: 52, note: 'Partial activity — confirm MIC; synergy combination' },
-      'Colistin':                { r: 12, note: 'Primary option for CRAB — nephrotoxicity risk; TDM required' },
-      'Tigecycline':             { r: 15, note: 'Limited data for bloodstream — preferred for LRTIs/SSTIs' },
+      'Meropenem':               { r: 66, note: 'CRAB, mandatory ID consultation' },
+      'Amikacin':                { r: 52, note: 'Partial activity, confirm MIC; synergy combination' },
+      'Colistin':                { r: 12, note: 'Primary option for CRAB, nephrotoxicity risk; TDM required' },
+      'Tigecycline':             { r: 15, note: 'Limited data for bloodstream, preferred for LRTIs/SSTIs' },
     },
   },
 };
@@ -102,7 +102,7 @@ export default function ResistanceTrends() {
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-6 text-xs font-semibold uppercase tracking-widest"
             style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.25)', color: '#60A5FA' }}>
             <Microscope size={12} />
-            Resistant Trend Explorer — Egypt AMR Data
+            Resistant Trend Explorer, Egypt AMR Data
           </div>
           <h2 className="text-4xl font-extrabold text-white mb-3 tracking-tight">
             Local Resistance <span style={{ color: '#3B82F6' }}>Rates</span>

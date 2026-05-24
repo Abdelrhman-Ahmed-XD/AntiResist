@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useHCPScore } from '../../context/HCPScoreContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Brain, CheckCircle2, XCircle, ChevronRight, RotateCcw, Award, Trophy } from 'lucide-react';
@@ -47,13 +47,13 @@ const QUESTIONS = [
     section: 0,
     q: 'Blood cultures at 72 h grow E. coli susceptible to ceftriaxone. Patient is on meropenem and clinically improving. The best stewardship action is:',
     options: [
-      'Continue meropenem — it is working',
+      'Continue meropenem, it is working',
       'Add vancomycin to broaden coverage',
       'De-escalate to IV/PO ceftriaxone',
       'Switch to colistin for coverage certainty',
     ],
     answer: 2,
-    explain: 'De-escalation to a narrower effective agent (ceftriaxone) preserves carbapenems for truly resistant organisms — a core stewardship principle.',
+    explain: 'De-escalation to a narrower effective agent (ceftriaxone) preserves carbapenems for truly resistant organisms, a core stewardship principle.',
   },
   {
     section: 0,
@@ -119,7 +119,7 @@ const QUESTIONS = [
     options: [
       'Amoxicillin 500 mg TDS × 7 days',
       'Azithromycin 500 mg × 5 days',
-      'Symptomatic treatment only — no antibiotics',
+      'Symptomatic treatment only, no antibiotics',
       'Ciprofloxacin 500 mg BD',
     ],
     answer: 2,
@@ -163,7 +163,7 @@ const QUESTIONS = [
       'Patient still spiking fever >38.5 °C',
     ],
     answer: 3,
-    explain: 'Ongoing high fever suggests incomplete source control or inadequate therapy — a contraindication to switching. Patients should be afebrile or have a clearly improving temperature trend.',
+    explain: 'Ongoing high fever suggests incomplete source control or inadequate therapy, a contraindication to switching. Patients should be afebrile or have a clearly improving temperature trend.',
   },
   {
     section: 3,
@@ -171,7 +171,7 @@ const QUESTIONS = [
     options: [
       'After the first dose of empirical antibiotics',
       'Only from central venous catheters',
-      'Before antibiotic initiation — at least 2 sets from separate peripheral sites',
+      'Before antibiotic initiation, at least 2 sets from separate peripheral sites',
       'After 24–48 h of fever',
     ],
     answer: 2,
@@ -182,7 +182,7 @@ const QUESTIONS = [
     q: 'According to WHO AWaRe, meropenem (carbapenem) belongs to which category?',
     options: ['Access', 'Watch', 'Reserve', 'Essential Only'],
     answer: 2,
-    explain: 'Carbapenems are in the Reserve group — they must be protected as last-resort agents for carbapenem-resistant organisms (CRE, MDR Pseudomonas, Acinetobacter).',
+    explain: 'Carbapenems are in the Reserve group, they must be protected as last-resort agents for carbapenem-resistant organisms (CRE, MDR Pseudomonas, Acinetobacter).',
   },
   {
     section: 3,
@@ -206,9 +206,35 @@ const QUESTIONS = [
       'Eliminate all antibiotic prescribing in outpatient settings',
     ],
     answer: 2,
-    explain: 'ASPs aim for the "right drug, right dose, right duration, right patient" — optimising outcomes while reducing collateral damage from antibiotics.',
+    explain: 'ASPs aim for the "right drug, right dose, right duration, right patient",optimising outcomes while reducing collateral damage from antibiotics.',
   },
 ];
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function shuffleOptions(q) {
+  const order = q.options.map((_, i) => i);
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  return {
+    ...q,
+    options: order.map(i => q.options[i]),
+    answer:  order.indexOf(q.answer),
+  };
+}
+
+function buildQuiz() {
+  return shuffle(QUESTIONS).map(shuffleOptions);
+}
 
 function getResult(score) {
   if (score >= 18) return { tier: 'Excellent', label: 'Expert Stewardship Practitioner', color: '#10B981', pts: 120 };
@@ -222,13 +248,14 @@ const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 
 export default function StewardshipQuiz({ onPoints }) {
   const { setScore: setHCPScore } = useHCPScore();
-  const [phase, setPhase]     = useState('intro');  // intro | quiz | result
-  const [qGlobal, setQGlobal] = useState(0);
+  const [phase, setPhase]       = useState('intro');
+  const [questions, setQuestions] = useState(QUESTIONS);
+  const [qGlobal, setQGlobal]   = useState(0);
   const [selected, setSelected] = useState(null);
   const [showExp, setShowExp]   = useState(false);
   const [score, setScore]       = useState(0);
 
-  const current = QUESTIONS[qGlobal];
+  const current = questions[qGlobal];
   const sectionIdx = current?.section ?? 0;
   const sec = SECTIONS[sectionIdx];
   const isLast = qGlobal === QUESTIONS.length - 1;
@@ -250,7 +277,7 @@ export default function StewardshipQuiz({ onPoints }) {
       setSelected(null);
       setShowExp(false);
     }
-  }, [isLast]);
+  }, [isLast, score, selected, current]);
 
   const handleRestart = () => {
     setPhase('intro');
@@ -258,6 +285,7 @@ export default function StewardshipQuiz({ onPoints }) {
     setSelected(null);
     setShowExp(false);
     setScore(0);
+    setQuestions(buildQuiz());
   };
 
   const result = getResult(score);
@@ -311,7 +339,7 @@ export default function StewardshipQuiz({ onPoints }) {
               </div>
 
               <motion.button
-                onClick={() => setPhase('quiz')}
+                onClick={() => { setQuestions(buildQuiz()); setPhase('quiz'); }}
                 whileHover={{ scale: 1.03, boxShadow: '0 6px 28px rgba(59,130,246,0.35)' }}
                 whileTap={{ scale: 0.97 }}
                 className="w-full py-4 rounded-full font-bold text-white text-base flex items-center justify-center gap-2"
@@ -441,7 +469,7 @@ export default function StewardshipQuiz({ onPoints }) {
                   const sectionQs = QUESTIONS.filter(q => q.section === si);
                   const sectionScore = sectionQs.filter((q, qi) => {
                     const globalIdx = QUESTIONS.indexOf(q);
-                    return selected; // approximation — show all
+                    return selected; // approximation, show all
                   }).length;
                   return (
                     <div key={si} className="p-3 rounded-xl"

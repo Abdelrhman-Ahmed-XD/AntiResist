@@ -93,7 +93,7 @@ export default function HeroPortal() {
             <motion.p variants={fadeUp}
               className="text-slate-400 text-base sm:text-lg leading-relaxed max-w-md mb-9 font-normal">
               Antibiotic resistance occurs when bacteria change in response to the use
-              of these medicines — making infections harder to treat and easier to spread.
+              of these medicines, making infections harder to treat and easier to spread.
             </motion.p>
 
             {/* CTAs */}

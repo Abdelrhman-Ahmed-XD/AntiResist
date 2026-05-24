@@ -9,34 +9,34 @@ const ANTIBIOTICS = [
     color: 'from-blue-600/20 to-indigo-600/20', border: 'border-blue-500/30', accent: 'text-blue-400',
     uses: ['Upper respiratory tract infections', 'Dental & oral infections', 'Skin & soft-tissue infections', 'Community-acquired pneumonia (mild)'],
     sideEffects: ['GI upset: nausea, diarrhea, bloating', 'Skin rash (maculopapular)', 'Allergic reactions (urticaria to anaphylaxis)'],
-    warnings: ['Contraindicated in confirmed penicillin allergy', 'Beta-lactam cross-reactivity with cephalosporins', 'Clavulanate component carries hepatotoxicity risk — monitor LFTs on prolonged use'],
+    warnings: ['Contraindicated in confirmed penicillin allergy', 'Beta-lactam cross-reactivity with cephalosporins', 'Clavulanate component carries hepatotoxicity risk; monitor LFTs on prolonged use'],
   },
   {
     id: 'azithromycin', name: 'Azithromycin', brand: 'Zithromax / Z-Pack', class: 'Macrolide',
     color: 'from-purple-600/20 to-violet-600/20', border: 'border-purple-500/30', accent: 'text-purple-400',
     uses: ['Atypical pneumonia (Mycoplasma, Chlamydophila)', 'Upper & lower respiratory tract infections', 'Chlamydia trachomatis (urogenital)', 'Typhoid (alternative regimen)'],
     sideEffects: ['GI upset: nausea, abdominal cramps', 'QT interval prolongation (cardiac risk)', 'Rare hepatotoxicity / cholestatic jaundice'],
-    warnings: ['Avoid in patients with cardiac arrhythmias or long QT syndrome', 'Significant macrolide resistance globally — culture sensitivity recommended', 'Not indicated for viral upper respiratory infections'],
+    warnings: ['Avoid in patients with cardiac arrhythmias or long QT syndrome', 'Significant macrolide resistance globally; culture sensitivity recommended', 'Not indicated for viral upper respiratory infections'],
   },
   {
     id: 'ceftriaxone', name: 'Ceftriaxone', brand: 'Rocephin', class: '3rd-generation Cephalosporin',
     color: 'from-cyan-600/20 to-teal-600/20', border: 'border-cyan-500/30', accent: 'text-cyan-400',
     uses: ['Severe community-acquired pneumonia', 'Bacterial meningitis', 'Sepsis (gram-negative coverage)', 'Typhoid fever (IV)', 'Gonorrhea (IM, single dose)'],
     sideEffects: ['Injection site pain (IM) / phlebitis (IV)', 'Biliary sludge / pseudolithiasis', 'Diarrhea / C. difficile risk', 'Hypersensitivity reactions'],
-    warnings: ['NEVER mix with IV calcium-containing solutions in neonates (fatal precipitation)', 'Promotes ESBL-producing organism selection under overuse', 'Use reserved for serious infections — broad empiric use accelerates resistance'],
+    warnings: ['NEVER mix with IV calcium-containing solutions in neonates (fatal precipitation)', 'Promotes ESBL-producing organism selection under overuse', 'Use reserved for serious infections; broad empiric use accelerates resistance'],
   },
   {
     id: 'cefixime', name: 'Cefixime', brand: 'Suprax / Cefspan', class: '3rd-generation Cephalosporin (oral)',
     color: 'from-teal-600/20 to-emerald-600/20', border: 'border-teal-500/30', accent: 'text-teal-400',
     uses: ['Uncomplicated UTIs', 'Typhoid fever (oral step-down)', 'Mild-to-moderate respiratory infections', 'Gonorrhea (alternative)'],
     sideEffects: ['Diarrhea, abdominal pain', 'Skin rash, urticaria', 'Nausea, dyspepsia'],
-    warnings: ['Increasing resistance rates — confirm susceptibility before use', 'Not appropriate for severe systemic or CNS infections', 'Avoid in patients with known cephalosporin or penicillin allergy'],
+    warnings: ['Increasing resistance rates; confirm susceptibility before use', 'Not appropriate for severe systemic or CNS infections', 'Avoid in patients with known cephalosporin or penicillin allergy'],
   },
   {
     id: 'doxycycline', name: 'Doxycycline', brand: 'Vibramycin / Doryx', class: 'Tetracycline',
     color: 'from-amber-600/20 to-orange-600/20', border: 'border-amber-500/30', accent: 'text-amber-400',
     uses: ['Acne vulgaris (moderate-severe)', 'Atypical respiratory infections', 'Rickettsial diseases (typhus, RMSF)', 'Chlamydia / Mycoplasma infections', 'Malaria prophylaxis'],
-    sideEffects: ['Photosensitivity — avoid direct sunlight', 'Esophagitis (always take with full glass of water, upright)', 'Permanent tooth discoloration in children'],
+    sideEffects: ['Photosensitivity; avoid direct sunlight', 'Esophagitis (always take with full glass of water, upright)', 'Permanent tooth discoloration in children'],
     warnings: ['Contraindicated in pregnancy and children under 8 years', 'Take on empty stomach if tolerated; avoid dairy and antacids (chelation)', 'Use broad-spectrum sunscreen throughout treatment'],
   },
   {
@@ -49,9 +49,9 @@ const ANTIBIOTICS = [
   {
     id: 'tmp-smx', name: 'Trimethoprim–Sulfamethoxazole', brand: 'Bactrim / Septrin', class: 'Sulfonamide + DHFR inhibitor',
     color: 'from-violet-600/20 to-purple-600/20', border: 'border-violet-500/30', accent: 'text-violet-400',
-    uses: ['Uncomplicated UTIs', 'MRSA skin & soft-tissue infections (oral)', 'Pneumocystis jirovecii pneumonia (PCP) — treatment & prophylaxis', 'Nocardiosis', "Traveler's diarrhea"],
+    uses: ['Uncomplicated UTIs', 'MRSA skin & soft-tissue infections (oral)', 'Pneumocystis jirovecii pneumonia (PCP): treatment and prophylaxis', 'Nocardiosis', "Traveler's diarrhea"],
     sideEffects: ['Severe skin reactions: SJS / TEN (Stevens-Johnson syndrome)', 'Hyperkalemia (potassium elevation)', 'Bone marrow suppression (leukopenia, thrombocytopenia)', 'Photosensitivity'],
-    warnings: ['Avoid in late pregnancy and neonates (kernicterus risk)', 'Monitor serum potassium — especially with ACE inhibitors or ARBs', 'High resistance rates for community UTIs — culture before prescribing'],
+    warnings: ['Avoid in late pregnancy and neonates (kernicterus risk)', 'Monitor serum potassium, especially with ACE inhibitors or ARBs', 'High resistance rates for community UTIs; culture before prescribing'],
   },
 ];
 

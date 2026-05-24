@@ -1,5 +1,4 @@
-import { Link } from "react-router-dom";
-import { Users } from "lucide-react";
+import { Users, LayoutGrid } from "lucide-react";
 import { motion } from "framer-motion";
 import ShieldScene from "../portal/ShieldScene";
 
@@ -15,8 +14,8 @@ const GRAD_TEXT = {
 };
 
 export default function Hero() {
-  function scrollToAMR() {
-    document.getElementById("what-is-amr")?.scrollIntoView({ behavior: "smooth" });
+  function scrollTo(id) {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   }
 
   return (
@@ -79,21 +78,22 @@ export default function Hero() {
 
             {/* Subtext */}
             <motion.p variants={fadeUp} className="text-lg text-secondary leading-relaxed max-w-lg">
-              A movement of Egyptian healthcare professionals committed to rational
-              antibiotic use.
+              Dedicated portals for patients and healthcare professionals, built to educate,
+              empower, and equip the fight against antimicrobial resistance in Egypt.
             </motion.p>
 
             {/* CTA buttons */}
             <motion.div variants={fadeUp} className="flex flex-wrap gap-3">
-              <Link
-                to="/join"
-                className="inline-flex items-center justify-center text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
+              <button
+                onClick={() => scrollTo("portals")}
+                className="inline-flex items-center justify-center gap-2 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
                 style={{ background: "linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)", boxShadow: "0 4px 20px rgba(124,58,237,0.32)" }}
               >
-                Join the Movement
-              </Link>
+                <LayoutGrid size={17} strokeWidth={1.8} />
+                Explore Portals
+              </button>
               <button
-                onClick={scrollToAMR}
+                onClick={() => scrollTo("what-is-amr")}
                 className="inline-flex items-center justify-center font-semibold px-6 py-3 rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
                 style={{ background: "rgba(124,58,237,0.08)", border: "1.5px solid rgba(124,58,237,0.35)", color: "#7C3AED" }}
                 onMouseEnter={e => { e.currentTarget.style.background = "rgba(124,58,237,0.14)"; }}

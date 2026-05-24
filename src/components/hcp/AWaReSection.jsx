@@ -36,15 +36,15 @@ const AWARE = [
     glow: 'rgba(239,68,68,0.18)',
     desc: 'Last-resort antibiotics for MDR / XDR organisms. Use only when all alternatives have failed or are not suitable.',
     examples: ['Meropenem', 'Imipenem-Cilastatin', 'Colistin', 'Tigecycline', 'Linezolid', 'Daptomycin', 'Ceftazidime-Avibactam'],
-    usage: 'Consult Infectious Disease — MDR/XDR organisms only',
-    target: 'Minimise use — monitor prescribing closely',
+    usage: 'Consult Infectious Disease, MDR/XDR organisms only',
+    target: 'Minimise use, monitor prescribing closely',
   },
 ];
 
 const IV_PO_CRITERIA = [
   { ok: true,  text: 'Haemodynamically stable (MAP ≥65 mmHg without vasopressors)' },
   { ok: true,  text: 'Afebrile for ≥24 h or improving temperature trend' },
-  { ok: true,  text: 'GI tract functioning — tolerating oral intake / no vomiting' },
+  { ok: true,  text: 'GI tract functioning, tolerating oral intake / no vomiting' },
   { ok: true,  text: 'Oral antibiotic equivalent with adequate bioavailability available' },
   { ok: true,  text: 'WBC normalising / improving inflammatory markers' },
   { ok: false, text: 'Endocarditis, meningitis, or CNS infection (IV required throughout)' },

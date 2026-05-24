@@ -429,10 +429,28 @@ const BACTERIA = [
   { id:'b11',type:'vibrio', left:'54%', top:'30%', rotate:'-40deg', color:'#22D3EE', size:44, anim:{ y:[0,-12,0], rotate:['-40deg','-34deg','-40deg'] }, dur:9.2,  delay:1.0 },
 ];
 
+const PURPLE_PALETTE = [
+  '#C4B5FD', '#A78BFA', '#8B5CF6', '#7C3AED', '#6D28D9',
+  '#DDD6FE', '#C084FC', '#A855F7', '#9333EA', '#E9D5FF', '#818CF8',
+];
+
+const BLUE_PALETTE = [
+  '#93C5FD', '#60A5FA', '#3B82F6', '#2563EB', '#1D4ED8',
+  '#BFDBFE', '#7DD3FC', '#38BDF8', '#0EA5E9', '#BAE6FD', '#818CF8',
+];
+
+const BLUE_PILLS = [
+  { id: 'p1', left:'7%',  top:'12%', rotate:'-36deg', w:62, h:26, c1:'#1D4ED8', c2:'#60A5FA', anim:{ y:[0,-14,0], rotate:['-36deg','-31deg','-36deg'] }, dur:5.2 },
+  { id: 'p2', left:'83%', top:'6%',  rotate:'22deg',  w:54, h:22, c1:'#1E3A8A', c2:'#93C5FD', anim:{ y:[0,-18,0], rotate:['22deg','27deg','22deg']  }, dur:6.8 },
+  { id: 'p3', left:'88%', top:'57%', rotate:'52deg',  w:58, h:24, c1:'#1D4ED8', c2:'#3B82F6', anim:{ y:[0,-11,0], rotate:['52deg','47deg','52deg']  }, dur:7.4 },
+  { id: 'p4', left:'3%',  top:'67%', rotate:'-16deg', w:50, h:20, c1:'#1E40AF', c2:'#BFDBFE', anim:{ y:[0,-15,0], rotate:['-16deg','-11deg','-16deg'] }, dur:5.9 },
+  { id: 'p5', left:'43%', top:'2%',  rotate:'74deg',  w:56, h:22, c1:'#2563EB', c2:'#60A5FA', anim:{ y:[0,-19,0], rotate:['74deg','69deg','74deg']  }, dur:4.8 },
+];
+
 /* ══════════════════════════════════════════════════════════
    Main export
 ══════════════════════════════════════════════════════════ */
-export default function FloatingParticles({ containerRef }) {
+export default function FloatingParticles({ containerRef, purple = false, blue = false }) {
   const mouseRef = useRef({ x: -9999, y: -9999 });
 
   useEffect(() => {
@@ -444,11 +462,13 @@ export default function FloatingParticles({ containerRef }) {
     return () => { el.removeEventListener('mousemove', onMove); el.removeEventListener('mouseleave', onLeave); };
   }, [containerRef]);
 
+  const activePills = blue ? BLUE_PILLS : PILLS;
+
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
 
       {/* Pills */}
-      {PILLS.map(({ id, left, top, rotate, w, h, c1, c2, anim, dur }) => (
+      {activePills.map(({ id, left, top, rotate, w, h, c1, c2, anim, dur }) => (
         <Particle key={id} mouseRef={mouseRef} style={{ left, top }}
           animateProps={{ ...anim }} duration={dur}>
           <div style={{ rotate, display:'inline-block' }}>
@@ -458,18 +478,23 @@ export default function FloatingParticles({ containerRef }) {
       ))}
 
       {/* Bacteria */}
-      {BACTERIA.map(({ id, type, left, top, rotate, color, size, anim, dur, delay }) => (
-        <Particle key={id} mouseRef={mouseRef} style={{ left, top }}
-          animateProps={anim} duration={dur} delay={delay}>
-          <div style={{ rotate, display:'inline-block' }}>
-            {type === 'cocci'  && <BacteriaCocci  id={id} size={size} color={color} />}
-            {type === 'corona' && <BacteriaCorona  id={id} size={size} color={color} />}
-            {type === 'rod'    && <BacteriaRod     id={id} size={size} color={color} />}
-            {type === 'vibrio' && <BacteriaVibrio  id={id} size={size} color={color} />}
-            {type === 'strep'  && <BacteriaStrep   id={id} size={size} color={color} />}
-          </div>
-        </Particle>
-      ))}
+      {BACTERIA.map(({ id, type, left, top, rotate, color, size, anim, dur, delay }, i) => {
+        const c = purple ? PURPLE_PALETTE[i % PURPLE_PALETTE.length]
+                : blue   ? BLUE_PALETTE[i % BLUE_PALETTE.length]
+                : color;
+        return (
+          <Particle key={id} mouseRef={mouseRef} style={{ left, top }}
+            animateProps={anim} duration={dur} delay={delay}>
+            <div style={{ rotate, display:'inline-block' }}>
+              {type === 'cocci'  && <BacteriaCocci  id={id} size={size} color={c} />}
+              {type === 'corona' && <BacteriaCorona  id={id} size={size} color={c} />}
+              {type === 'rod'    && <BacteriaRod     id={id} size={size} color={c} />}
+              {type === 'vibrio' && <BacteriaVibrio  id={id} size={size} color={c} />}
+              {type === 'strep'  && <BacteriaStrep   id={id} size={size} color={c} />}
+            </div>
+          </Particle>
+        );
+      })}
     </div>
   );
 }

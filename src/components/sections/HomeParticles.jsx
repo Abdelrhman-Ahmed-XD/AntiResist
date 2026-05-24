@@ -16,7 +16,7 @@
  * Rest of page (top 20-100%): opacity 0.16 — sparser, subtle
  * All particles repel the mouse cursor via spring physics.
  */
-import { useEffect, useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 
 const REPEL_RADIUS = 145;
@@ -381,8 +381,9 @@ function renderBacteria(type, id, size, color) {
 
 /* ══════════════════════════════════════════════════════════
    Particle — spring-repel wrapper
+   repel=false: skips all RAF loops — just floats gently
 ══════════════════════════════════════════════════════════ */
-function Particle({ mouseRef, style, children, animateProps, duration, delay = 0, opacity }) {
+function Particle({ mouseRef, style, children, animateProps, duration, delay = 0, opacity, repel }) {
   const elRef = useRef(null);
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
@@ -390,6 +391,7 @@ function Particle({ mouseRef, style, children, animateProps, duration, delay = 0
   const sy = useSpring(my, SPRING_CFG);
 
   useEffect(() => {
+    if (!repel) return; // skip RAF — saves ~54 rAF loops on auth pages
     let rafId;
     const tick = () => {
       const el = elRef.current;
@@ -412,7 +414,7 @@ function Particle({ mouseRef, style, children, animateProps, duration, delay = 0
     };
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-  }, [mx, my, mouseRef]);
+  }, [repel, mx, my, mouseRef]);
 
   return (
     <motion.div ref={elRef} style={{ ...style, x: sx, y: sy, position: 'absolute', opacity }}>
@@ -527,11 +529,14 @@ const FLOATS = [
 
 /* ══════════════════════════════════════════════════════════
    Main export
+   repel (default true) — enables mouse-repel RAF loops.
+   Pass repel={false} on non-home pages for much lower CPU.
 ══════════════════════════════════════════════════════════ */
-export default function HomeParticles() {
+export default memo(function HomeParticles({ repel = true }) {
   const mouseRef = useRef({ x: -9999, y: -9999 });
 
   useEffect(() => {
+    if (!repel) return; // no mouse tracking needed without repel
     const onMove  = (e) => { mouseRef.current = { x: e.clientX, y: e.clientY }; };
     const onLeave = ()  => { mouseRef.current = { x: -9999,    y: -9999    }; };
     document.addEventListener('mousemove',  onMove);
@@ -540,7 +545,7 @@ export default function HomeParticles() {
       document.removeEventListener('mousemove',  onMove);
       document.removeEventListener('mouseleave', onLeave);
     };
-  }, []);
+  }, [repel]);
 
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true" style={{ zIndex: 0 }}>
@@ -551,7 +556,7 @@ export default function HomeParticles() {
         const { y, dur, delay } = FLOATS[idx % FLOATS.length];
         return (
           <Particle key={id} mouseRef={mouseRef} style={{ left, top }} opacity={0.56}
-            animateProps={{ y }} duration={dur} delay={delay}>
+            animateProps={{ y }} duration={dur} delay={delay} repel={repel}>
             <div style={{ rotate: rot, display: 'inline-block' }}>
               {renderBacteria(type, id, sz, color)}
             </div>
@@ -565,7 +570,7 @@ export default function HomeParticles() {
         const { y, dur, delay } = FLOATS[(idx + 5) % FLOATS.length];
         return (
           <Particle key={id} mouseRef={mouseRef} style={{ left, top }} opacity={0.30}
-            animateProps={{ y }} duration={dur} delay={delay}>
+            animateProps={{ y }} duration={dur} delay={delay} repel={repel}>
             <div style={{ rotate: rot, display: 'inline-block' }}>
               {renderBacteria(type, id, sz, color)}
             </div>
@@ -575,4 +580,4 @@ export default function HomeParticles() {
 
     </div>
   );
-}
+});

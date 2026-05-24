@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-hot-toast";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
 import HomeParticles from "../components/sections/HomeParticles";
-import { signUp } from "../firebase/auth";
+import { signUp, updateDisplayName } from "../firebase/auth";
 import { addSupporter, createUserProfile } from "../firebase/firestore";
 
 const GRAD = {
@@ -20,19 +20,12 @@ const SPECIALTIES = [
   "Doctor", "Pharmacist", "Nurse", "Medical Student", "Pharmacy Student", "Other",
 ];
 
-const INITIAL = {
-  name: "", email: "", password: "", confirm: "", specialty: "", workplace: "",
-};
-
-const fadeUp  = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } } };
-const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.07, delayChildren: 0.15 } } };
-
-/* ── Shared input/select component ─────────────────────────── */
+/* ── Input: no framer-motion so every keystroke stays fast ── */
 function StyledInput({ hasError, className = "", style: extStyle = {}, ...props }) {
   const [focused, setFocused] = useState(false);
   return (
     <input
-      className={`w-full px-4 py-3 rounded-xl text-sm bg-white outline-none transition-all duration-200 placeholder:text-gray-400 text-gray-900 ${className}`}
+      className={`w-full px-4 py-3 rounded-xl text-sm bg-white outline-none transition-all duration-150 placeholder:text-gray-400 text-gray-900 ${className}`}
       style={{
         border: `1.5px solid ${hasError ? "#EF4444" : focused ? "#7C3AED" : "rgba(124,58,237,0.22)"}`,
         boxShadow: focused && !hasError ? "0 0 0 3px rgba(124,58,237,0.10)" : "none",
@@ -49,7 +42,7 @@ function StyledSelect({ hasError, children, ...props }) {
   const [focused, setFocused] = useState(false);
   return (
     <select
-      className="w-full px-4 py-3 rounded-xl text-sm bg-white outline-none transition-all duration-200 text-gray-900 cursor-pointer"
+      className="w-full px-4 py-3 rounded-xl text-sm bg-white outline-none transition-all duration-150 text-gray-900 cursor-pointer"
       style={{
         border: `1.5px solid ${hasError ? "#EF4444" : focused ? "#7C3AED" : "rgba(124,58,237,0.22)"}`,
         boxShadow: focused && !hasError ? "0 0 0 3px rgba(124,58,237,0.10)" : "none",
@@ -64,9 +57,10 @@ function StyledSelect({ hasError, children, ...props }) {
   );
 }
 
-function FormField({ label, hint, error, children }) {
+/* Plain div field wrapper — no motion, no re-render cost on keystroke */
+function Field({ label, hint, error, children }) {
   return (
-    <motion.div variants={fadeUp}>
+    <div>
       <div className="flex items-baseline justify-between mb-1.5">
         <label className="text-sm font-semibold text-gray-700">{label}</label>
         {hint && <span className="text-xs text-gray-400">{hint}</span>}
@@ -75,20 +69,22 @@ function FormField({ label, hint, error, children }) {
       <AnimatePresence>
         {error && (
           <motion.p
-            initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.2 }}
-            className="text-xs mt-1.5 font-medium"
+            key={error}
+            initial={{ opacity: 0, y: -4, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: "auto" }}
+            exit={{ opacity: 0, y: -4, height: 0 }}
+            transition={{ duration: 0.18 }}
+            className="text-xs mt-1.5 font-medium overflow-hidden"
             style={{ color: "#EF4444" }}
           >
             {error}
           </motion.p>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }
 
-/* ── White shield logo for gradient header ─────────────────── */
 function ShieldLogo() {
   return (
     <svg width="22" height="22" viewBox="0 0 28 28" fill="none" aria-hidden="true">
@@ -129,50 +125,91 @@ function ShieldLogo() {
   );
 }
 
+function validate({ name, email, password, confirm, specialty }) {
+  const e = {};
+  const tn = name.trim();
+  const te = email.trim();
+
+  if (!tn)
+    e.name = "Full name is required.";
+  else if (tn.length < 2)
+    e.name = "Name must be at least 2 characters.";
+  else if (!/^[\p{L}\s'-]+$/u.test(tn))
+    e.name = "Name can only contain letters, spaces, hyphens, and apostrophes.";
+
+  if (!te)
+    e.email = "Email address is required.";
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(te))
+    e.email = "Enter a valid email address.";
+
+  if (!password)
+    e.password = "Password is required.";
+  else if (password.length < 8)
+    e.password = "Password must be at least 8 characters.";
+  else if (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password))
+    e.password = "Password must contain at least one letter and one number.";
+
+  if (!confirm)
+    e.confirm = "Please confirm your password.";
+  else if (password !== confirm)
+    e.confirm = "Passwords do not match.";
+
+  if (!specialty)
+    e.specialty = "Please select your specialty.";
+
+  return e;
+}
+
 export default function JoinMovement() {
   const navigate = useNavigate();
-  const [form, setForm]         = useState(INITIAL);
-  const [showPass, setShowPass] = useState(false);
-  const [errors, setErrors]     = useState({});
-  const [loading, setLoading]   = useState(false);
+  const location = useLocation();
+  const from = location.state?.from || null;
 
-  function set(field, value) {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
-  }
+  /* Individual state per field — changing one field only re-renders that input */
+  const [name,      setName]      = useState("");
+  const [email,     setEmail]     = useState("");
+  const [password,  setPassword]  = useState("");
+  const [confirm,   setConfirm]   = useState("");
+  const [specialty, setSpecialty] = useState("");
+  const [workplace, setWorkplace] = useState("");
 
-  function validate() {
-    const e = {};
-    if (!form.name.trim())                     e.name     = "Full name is required.";
-    if (!form.email.trim())                    e.email    = "Email is required.";
-    else if (!/\S+@\S+\.\S+/.test(form.email)) e.email    = "Enter a valid email address.";
-    if (form.password.length < 6)              e.password = "Password must be at least 6 characters.";
-    if (form.password !== form.confirm)        e.confirm  = "Passwords do not match.";
-    if (!form.specialty)                       e.specialty = "Please select your specialty.";
-    return e;
+  const [showPass,    setShowPass]    = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [errors,      setErrors]      = useState({});
+  const [loading,     setLoading]     = useState(false);
+
+  function clr(field) {
+    if (errors[field]) setErrors(prev => ({ ...prev, [field]: "" }));
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const e2 = validate();
-    if (Object.keys(e2).length) { setErrors(e2); return; }
+    const errs = validate({ name, email, password, confirm, specialty });
+    if (Object.keys(errs).length) { setErrors(errs); return; }
 
     setLoading(true);
     try {
-      const { user } = await signUp(form.email.trim(), form.password);
-      await Promise.all([
-        addSupporter(user.uid, {
-          name:      form.name.trim(),
-          specialty: form.specialty,
-          workplace: form.workplace.trim(),
-        }),
-        createUserProfile(user.uid, {
-          name:      form.name.trim(),
-          specialty: form.specialty,
-        }),
-      ]);
-      toast.success("Welcome to AntiResist! Your profile is live.");
-      navigate(`/profile/${user.uid}`);
+      const { user } = await signUp(email.trim(), password);
+      await updateDisplayName(user, name.trim());
+
+      try {
+        await Promise.all([
+          addSupporter(user.uid, {
+            name:      name.trim(),
+            specialty,
+            workplace: workplace.trim(),
+          }),
+          createUserProfile(user.uid, {
+            name:      name.trim(),
+            specialty,
+          }),
+        ]);
+      } catch (fsErr) {
+        console.warn("Could not save profile data:", fsErr.message);
+      }
+
+      toast.success("Welcome to AntiResist!");
+      navigate(from || `/profile/${user.uid}`);
     } catch (err) {
       if (err.code === "auth/email-already-in-use") {
         setErrors({ email: "This email is already registered. Sign in instead." });
@@ -188,7 +225,7 @@ export default function JoinMovement() {
     <>
       <Navbar />
       <div className="relative" style={{ overflowX: "clip", minHeight: "100vh" }}>
-        <HomeParticles />
+        <HomeParticles repel={false} />
         <div className="relative z-10 py-28 px-4 flex justify-center">
           <motion.div
             className="w-full max-w-lg"
@@ -196,7 +233,6 @@ export default function JoinMovement() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
-            {/* Glass card */}
             <div
               className="rounded-3xl overflow-hidden"
               style={{
@@ -214,143 +250,155 @@ export default function JoinMovement() {
               >
                 <div className="flex items-center gap-2 mb-3">
                   <ShieldLogo />
-                  <span className="text-white/80 text-sm font-medium tracking-wide">AntiResist Campaign</span>
+                  <span className="text-white/80 text-sm font-medium tracking-wide">AntiResist</span>
                 </div>
                 <h1 className="text-2xl font-bold text-white mb-1.5 tracking-tight">
-                  Join the movement
+                  Create your account
                 </h1>
                 <p className="text-white/75 text-sm leading-relaxed">
-                  Add your name to the wall of healthcare professionals fighting
-                  antimicrobial resistance across Egypt.
+                  Join the fight against antimicrobial resistance. Track your learning, earn badges, and download your certificate.
                 </p>
               </div>
 
-              {/* Form */}
-              <motion.form
+              {/* Form — plain divs, no motion wrappers around fields */}
+              <form
                 onSubmit={handleSubmit}
                 noValidate
                 className="px-8 py-8 space-y-5"
-                initial="hidden"
-                animate="show"
-                variants={stagger}
               >
-                <FormField label="Full name" error={errors.name}>
+                <Field label="Full name" error={errors.name}>
                   <StyledInput
                     type="text"
-                    placeholder="Dr. Ahmed Hassan"
-                    value={form.name}
-                    onChange={(e) => set("name", e.target.value)}
+                    placeholder="e.g. Ahmed Hassan"
+                    value={name}
+                    onChange={e => { setName(e.target.value); clr("name"); }}
                     hasError={!!errors.name}
+                    autoComplete="name"
                   />
-                </FormField>
+                </Field>
 
-                <FormField label="Email address" error={errors.email}>
+                <Field label="Email address" error={errors.email}>
                   <StyledInput
                     type="email"
-                    placeholder="you@hospital.eg"
-                    value={form.email}
-                    onChange={(e) => set("email", e.target.value)}
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={e => { setEmail(e.target.value); clr("email"); }}
                     hasError={!!errors.email}
+                    autoComplete="email"
                   />
-                </FormField>
+                </Field>
 
-                <FormField label="Password" error={errors.password}>
+                <Field
+                  label="Password"
+                  hint="Min. 8 chars, letters + numbers"
+                  error={errors.password}
+                >
                   <div className="relative">
                     <StyledInput
                       type={showPass ? "text" : "password"}
-                      placeholder="Min. 6 characters"
-                      value={form.password}
-                      onChange={(e) => set("password", e.target.value)}
+                      placeholder="Create a strong password"
+                      value={password}
+                      onChange={e => { setPassword(e.target.value); clr("password"); }}
                       hasError={!!errors.password}
+                      autoComplete="new-password"
                       style={{ paddingRight: "3rem" }}
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPass((v) => !v)}
+                      onClick={() => setShowPass(v => !v)}
                       tabIndex={-1}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors duration-150"
-                      style={{ color: "#9CA3AF" }}
-                      onMouseEnter={e => e.currentTarget.style.color = "#7C3AED"}
-                      onMouseLeave={e => e.currentTarget.style.color = "#9CA3AF"}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600 transition-colors duration-150"
                     >
                       {showPass ? <EyeOff size={16} strokeWidth={1.5} /> : <Eye size={16} strokeWidth={1.5} />}
                     </button>
                   </div>
-                </FormField>
+                </Field>
 
-                <FormField label="Confirm password" error={errors.confirm}>
-                  <StyledInput
-                    type="password"
-                    placeholder="Repeat your password"
-                    value={form.confirm}
-                    onChange={(e) => set("confirm", e.target.value)}
-                    hasError={!!errors.confirm}
-                  />
-                </FormField>
+                <Field label="Confirm password" error={errors.confirm}>
+                  <div className="relative">
+                    <StyledInput
+                      type={showConfirm ? "text" : "password"}
+                      placeholder="Repeat your password"
+                      value={confirm}
+                      onChange={e => { setConfirm(e.target.value); clr("confirm"); }}
+                      hasError={!!errors.confirm}
+                      autoComplete="new-password"
+                      style={{ paddingRight: "3rem" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirm(v => !v)}
+                      tabIndex={-1}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600 transition-colors duration-150"
+                    >
+                      {showConfirm ? <EyeOff size={16} strokeWidth={1.5} /> : <Eye size={16} strokeWidth={1.5} />}
+                    </button>
+                    {confirm && password && password === confirm && (
+                      <span className="absolute right-9 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <CheckCircle2 size={14} className="text-emerald-500" />
+                      </span>
+                    )}
+                  </div>
+                </Field>
 
-                <FormField label="Specialty" error={errors.specialty}>
+                <Field label="Specialty" error={errors.specialty}>
                   <StyledSelect
-                    value={form.specialty}
-                    onChange={(e) => set("specialty", e.target.value)}
+                    value={specialty}
+                    onChange={e => { setSpecialty(e.target.value); clr("specialty"); }}
                     hasError={!!errors.specialty}
                   >
                     <option value="">Select your specialty…</option>
-                    {SPECIALTIES.map((s) => (
+                    {SPECIALTIES.map(s => (
                       <option key={s} value={s}>{s}</option>
                     ))}
                   </StyledSelect>
-                </FormField>
+                </Field>
 
-                <FormField label="Workplace" hint="Optional" error={errors.workplace}>
+                <Field label="Workplace" hint="Optional" error={errors.workplace}>
                   <StyledInput
                     type="text"
                     placeholder="Hospital or institution name"
-                    value={form.workplace}
-                    onChange={(e) => set("workplace", e.target.value)}
+                    value={workplace}
+                    onChange={e => setWorkplace(e.target.value)}
                     hasError={!!errors.workplace}
+                    autoComplete="organization"
                   />
-                </FormField>
+                </Field>
 
-                {/* Submit */}
-                <motion.div variants={fadeUp}>
-                  <motion.button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full text-white font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
-                    style={{
-                      background: "linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)",
-                      boxShadow: "0 4px 20px rgba(124,58,237,0.38)",
-                    }}
-                    whileHover={!loading ? { scale: 1.015, boxShadow: "0 6px 28px rgba(124,58,237,0.48)" } : {}}
-                    whileTap={!loading ? { scale: 0.98 } : {}}
-                    transition={{ duration: 0.15 }}
-                  >
-                    {loading && <Loader2 size={16} className="animate-spin" />}
-                    {loading ? "Creating your profile…" : "Join AntiResist"}
-                  </motion.button>
-                </motion.div>
+                <motion.button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full text-white font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                  style={{
+                    background: "linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)",
+                    boxShadow: "0 4px 20px rgba(124,58,237,0.38)",
+                  }}
+                  whileHover={!loading ? { scale: 1.015, boxShadow: "0 6px 28px rgba(124,58,237,0.48)" } : {}}
+                  whileTap={!loading ? { scale: 0.98 } : {}}
+                  transition={{ duration: 0.15 }}
+                >
+                  {loading && <Loader2 size={16} className="animate-spin" />}
+                  {loading ? "Creating your account…" : "Create Account"}
+                </motion.button>
 
-                <motion.p variants={fadeUp} className="text-center text-sm text-gray-500">
-                  Already registered?{" "}
+                <p className="text-center text-sm text-gray-500">
+                  Already have an account?{" "}
                   <Link
                     to="/sign-in"
-                    className="font-semibold transition-colors duration-200"
-                    style={{ color: "#7C3AED" }}
-                    onMouseEnter={e => e.currentTarget.style.color = "#2563EB"}
-                    onMouseLeave={e => e.currentTarget.style.color = "#7C3AED"}
+                    state={{ from }}
+                    className="font-semibold text-purple-600 hover:text-blue-600 transition-colors duration-200"
                   >
                     Sign in
                   </Link>
-                </motion.p>
-              </motion.form>
+                </p>
+              </form>
             </div>
 
-            {/* Tagline below card */}
             <motion.p
               className="text-center text-xs mt-5 text-gray-500"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8, duration: 0.5 }}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7, duration: 0.5 }}
             >
-              🔬 Fighting AMR — one prescription at a time
+              🔬 Fighting AMR — one responsible prescription at a time
             </motion.p>
           </motion.div>
         </div>

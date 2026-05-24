@@ -29,14 +29,16 @@ const PILLARS = [
 ];
 
 const TEAM = [
-  { name: "Campaign Team",      role: "Content & Clinical Review",   initials: "CT", color: "bg-teal"    },{ name: "Campaign Team",      role: "Content & Clinical Review",   initials: "CT", color: "bg-teal"    },{ name: "Campaign Team",      role: "Content & Clinical Review",   initials: "CT", color: "bg-teal"    },{ name: "Campaign Team",      role: "Content & Clinical Review",   initials: "CT", color: "bg-teal"    },{ name: "Campaign Team",      role: "Content & Clinical Review",   initials: "CT", color: "bg-teal"    },{ name: "Campaign Team",      role: "Content & Clinical Review",   initials: "CT", color: "bg-teal"    },{ name: "Campaign Team",      role: "Content & Clinical Review",   initials: "CT", color: "bg-teal"    },
+  { name: "Campaign Team",    role: "Content & Clinical Review",  initials: "CT", color: "bg-teal"         },
+  { name: "Clinical Leads",   role: "Medical Accuracy & Guidance", initials: "CL", color: "bg-purple-500"  },
+  { name: "Dev Team",         role: "Design & Engineering",        initials: "DT", color: "bg-blue-500"    },
 ];
 
 export default function AboutUs() {
   return (
     <>
       <Navbar />
-      <main className="bg-bg min-h-screen">
+      <main className="bg-bg min-h-screen pt-16">
 
         {/* ── Hero ── */}
         <div className="bg-white border-b border-gray-100 py-20">
@@ -163,8 +165,8 @@ export default function AboutUs() {
               to translating stewardship science into public action.
             </p>
             <div className="flex flex-wrap gap-5">
-              {TEAM.map(({ name, role, initials, color }) => (
-                <div key={name} className="flex items-center gap-4 bg-bg border border-gray-100 rounded-2xl px-5 py-4">
+              {TEAM.map(({ name, role, initials, color }, i) => (
+                <div key={i} className="flex items-center gap-4 bg-bg border border-gray-100 rounded-2xl px-5 py-4">
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-sm flex-shrink-0 ${color}`}>
                     {initials}
                   </div>

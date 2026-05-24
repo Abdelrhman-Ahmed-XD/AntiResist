@@ -13,6 +13,7 @@ import {
   limit,
   serverTimestamp,
 } from "firebase/firestore";
+// Note: updateUserProfile uses setDoc+merge so it creates the doc if absent
 import { db } from "./config";
 
 // ── User Profiles ───────────────────────────────────────────────────────────
@@ -35,7 +36,7 @@ export async function getUserProfile(uid) {
 }
 
 export async function updateUserProfile(uid, data) {
-  return updateDoc(doc(db, "userProfiles", uid), data);
+  return setDoc(doc(db, "userProfiles", uid), data, { merge: true });
 }
 
 // ── Supporters ──────────────────────────────────────────────────────────────

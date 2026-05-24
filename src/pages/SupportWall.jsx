@@ -129,7 +129,7 @@ export default function SupportWall() {
         />
       )}
 
-      <main className="bg-bg min-h-screen">
+      <main className="bg-bg min-h-screen pt-16">
 
         {/* ── Hero strip ── */}
         <div className="bg-white border-b border-gray-100 py-14">

@@ -7,42 +7,42 @@ const QUESTIONS = [
   {
     question: 'Can antibiotics treat any type of infection?',
     options: [
-      { label: 'Yes — antibiotics can treat both viral and bacterial infections.', correct: false },
-      { label: 'No — antibiotics only work against bacterial infections, not viral ones like cold or flu.', correct: true },
+      { label: 'Yes, antibiotics can treat both viral and bacterial infections.', correct: false },
+      { label: 'No, antibiotics only work against bacterial infections, not viral ones like cold or flu.', correct: true },
     ],
     explanation: 'Antibiotics are designed to target bacteria. They have zero effect on viruses like influenza or COVID-19. Using them for viral infections is ineffective and directly accelerates resistance.',
   },
   {
     question: 'Does taking antibiotics regularly help prevent future infections?',
     options: [
-      { label: 'Yes — frequent use builds up immunity against future illness.', correct: false },
-      { label: 'No — overuse increases the risk of drug-resistant infections and harms gut health.', correct: true },
+      { label: 'Yes, frequent use builds up immunity against future illness.', correct: false },
+      { label: 'No, overuse increases the risk of drug-resistant infections and harms gut health.', correct: true },
     ],
     explanation: 'Antibiotics do not boost immunity. Overusing them wipes out beneficial gut bacteria and creates selective pressure for resistant strains, making future infections far harder to treat.',
   },
   {
     question: 'Will a higher dose of antibiotics make you recover faster?',
     options: [
-      { label: 'Yes — a higher dose kills bacteria faster and shortens illness.', correct: false },
-      { label: 'No — it raises resistance risk and causes serious harm to your body.', correct: true },
+      { label: 'Yes, a higher dose kills bacteria faster and shortens illness.', correct: false },
+      { label: 'No, it raises resistance risk and causes serious harm to your body.', correct: true },
     ],
     explanation: 'Exceeding the prescribed dose does not speed recovery. It damages your gut microbiome, can cause organ toxicity, and breeds resistance by exposing bacteria to sub-lethal stress.',
   },
   {
     question: 'Is it safe to stop antibiotics once your symptoms improve?',
     options: [
-      { label: 'Yes — feeling better means the infection is gone and the course is complete.', correct: false },
-      { label: 'No — you must complete the full course to prevent relapse and resistance.', correct: true },
+      { label: 'Yes, feeling better means the infection is gone and the course is complete.', correct: false },
+      { label: 'No, you must complete the full course to prevent relapse and resistance.', correct: true },
     ],
     explanation: 'Symptom relief does not mean the bacteria are eliminated. The toughest survivors remain. Stopping early lets these resistant bacteria multiply, causing a relapse that is much harder to treat.',
   },
   {
     question: 'Are over-the-counter (OTC) antibiotics safe and appropriate to use?',
     options: [
-      { label: 'Yes — OTC availability means they are safe and effective for self-treatment.', correct: false },
-      { label: 'No — they are likely inappropriate, counterfeit, or mislabeled, and carry serious risks.', correct: true },
+      { label: 'Yes, OTC availability means they are safe and effective for self-treatment.', correct: false },
+      { label: 'No, they are likely inappropriate, counterfeit, or mislabeled, and carry serious risks.', correct: true },
     ],
-    explanation: 'No antibiotic is safe without a clinical diagnosis and prescription. OTC antibiotics are frequently the wrong class, substandard in quality, or counterfeit — a leading driver of global AMR.',
+    explanation: 'No antibiotic is safe without a clinical diagnosis and prescription. OTC antibiotics are frequently the wrong class, substandard in quality, or counterfeit, making them a leading driver of global AMR.',
   },
 ];
 
@@ -57,18 +57,32 @@ const feedbackVariant = {
   show:   { opacity: 1, y: 0,  height: 'auto', transition: { duration: 0.3, ease: 'easeOut' } },
 };
 
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildDeck() {
+  return shuffle(QUESTIONS).map(q => ({ ...q, options: shuffle(q.options) }));
+}
+
 export default function MythsQuiz() {
   const { addPoints, hasAction } = useGamification();
-  const [idx, setIdx]         = useState(0);
+  const [deck, setDeck]         = useState([]);
+  const [idx, setIdx]           = useState(0);
   const [selected, setSelected] = useState(null);
-  const [score, setScore]     = useState(0);
-  const [answers, setAnswers] = useState([]);
-  const [phase, setPhase]     = useState('idle');
+  const [score, setScore]       = useState(0);
+  const [answers, setAnswers]   = useState([]);
+  const [phase, setPhase]       = useState('idle');
 
-  const current = QUESTIONS[idx];
-  const isLast  = idx === QUESTIONS.length - 1;
+  const current = deck[idx];
+  const isLast  = idx === deck.length - 1;
 
-  const startQuiz = () => { setIdx(0); setSelected(null); setScore(0); setAnswers([]); setPhase('active'); };
+  const startQuiz = () => { setDeck(buildDeck()); setIdx(0); setSelected(null); setScore(0); setAnswers([]); setPhase('active'); };
 
   const choose = (opt) => {
     if (selected !== null) return;
@@ -90,7 +104,8 @@ export default function MythsQuiz() {
 
   const reset = () => { setIdx(0); setSelected(null); setScore(0); setAnswers([]); setPhase('idle'); };
 
-  const pct = Math.round((score / QUESTIONS.length) * 100);
+  const total = QUESTIONS.length;
+  const pct = Math.round((score / total) * 100);
 
   return (
     <section id="myths-quiz" className="py-24 px-4 sm:px-6 lg:px-8">
@@ -107,7 +122,7 @@ export default function MythsQuiz() {
           <div className="section-label mb-4 mx-auto">Interactive</div>
           <h2 className="text-4xl sm:text-5xl font-extrabold text-white mb-4">Myths vs Facts Quiz</h2>
           <p className="text-slate-400 text-lg">
-            5 questions. Test what you know — and earn <span className="text-purple-400 font-semibold">+20 points</span> on completion.
+            5 questions. Test what you know and earn <span className="text-purple-400 font-semibold">+20 points</span> on completion.
           </p>
         </motion.div>
 
@@ -153,15 +168,15 @@ export default function MythsQuiz() {
               <motion.div key={`q-${idx}`} variants={panelVariants} initial="enter" animate="center" exit="exit">
                 {/* Progress bar */}
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-purple-300 text-sm font-medium">Question {idx + 1} of {QUESTIONS.length}</span>
+                  <span className="text-purple-300 text-sm font-medium">Question {idx + 1} of {total}</span>
                   <span className="text-slate-500 text-sm">{score} correct so far</span>
                 </div>
                 <div className="h-1.5 bg-white/5 rounded-full mb-8 overflow-hidden">
                   <motion.div
                     className="h-full rounded-full"
                     style={{ background: 'linear-gradient(90deg, #7C3AED, #4F46E5)' }}
-                    initial={{ width: `${(idx / QUESTIONS.length) * 100}%` }}
-                    animate={{ width: `${((idx + 1) / QUESTIONS.length) * 100}%` }}
+                    initial={{ width: `${(idx / total) * 100}%` }}
+                    animate={{ width: `${((idx + 1) / total) * 100}%` }}
                     transition={{ duration: 0.5, ease: 'easeInOut' }}
                   />
                 </div>
@@ -270,7 +285,7 @@ export default function MythsQuiz() {
                     />
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-3xl font-black text-white">{score}/{QUESTIONS.length}</span>
+                    <span className="text-3xl font-black text-white">{score}/{total}</span>
                     <span className="text-xs text-slate-400">{pct}%</span>
                   </div>
                 </div>
@@ -280,7 +295,7 @@ export default function MythsQuiz() {
                 </h3>
                 <p className="text-slate-400 mb-4">
                   You answered <span className="text-white font-semibold">{score}</span> of{' '}
-                  <span className="text-white font-semibold">{QUESTIONS.length}</span> questions correctly.
+                  <span className="text-white font-semibold">{total}</span> questions correctly.
                 </p>
 
                 <motion.div

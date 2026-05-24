@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Shield, Pill, Globe, HeartHandshake,
-  Users, Info, LogIn, Menu, X, Stethoscope,
+  Shield, Pill, Globe, LayoutGrid,
+  Users, Info, LogIn, LogOut, Menu, X, Stethoscope,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { signOut } from "../../firebase/auth";
 
 const NAV_LINKS = [
-  { icon: Shield,         label: "What is AMR",  href: "#what-is-amr",  scroll: true },
-  { icon: Pill,           label: "Rational Use",  href: "#rational-use", scroll: true },
-  { icon: Globe,          label: "Impact",        href: "#impact",       scroll: true },
-  { icon: HeartHandshake, label: "How to Help",   href: "#how-to-help",  scroll: true },
-  { icon: Info,           label: "About",         href: "/about",        scroll: false },
+  { icon: Shield,      label: "What is AMR",  href: "#what-is-amr",  scroll: true },
+  { icon: Pill,        label: "Rational Use", href: "#rational-use", scroll: true },
+  { icon: Globe,       label: "Impact",       href: "#impact",       scroll: true },
+  { icon: LayoutGrid,  label: "Portal",       href: "#portals",      scroll: true },
+  { icon: Info,        label: "About",        href: "/about",        scroll: false },
 ];
 
 function scrollTo(id) {
@@ -33,13 +34,6 @@ function scrollToTop() {
   requestAnimationFrame(step);
 }
 
-const GRAD_TEXT = {
-  background: "linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)",
-  WebkitBackgroundClip: "text",
-  WebkitTextFillColor: "transparent",
-  backgroundClip: "text",
-};
-
 function NavItem({ icon: Icon, label, onClick }) {
   const [hovered, setHovered] = useState(false);
   return (
@@ -53,13 +47,13 @@ function NavItem({ icon: Icon, label, onClick }) {
       <motion.div animate={{ color: hovered ? "#7C3AED" : "#6B7280" }} transition={{ duration: 0.2 }}>
         <Icon size={17} strokeWidth={1.6} />
       </motion.div>
-      <motion.span
+      {/* Plain span with CSS color transition — avoids background-clip rectangle artifact */}
+      <span
         className="text-xs font-medium"
-        animate={hovered ? GRAD_TEXT : { color: "#6B7280", WebkitTextFillColor: "#6B7280" }}
-        transition={{ duration: 0.2 }}
+        style={{ color: hovered ? "#7C3AED" : "#6B7280", transition: "color 0.2s ease" }}
       >
         {label}
-      </motion.span>
+      </span>
       <motion.span
         className="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full"
         style={{ background: "linear-gradient(90deg, #7C3AED, #2563EB)" }}
@@ -95,6 +89,7 @@ function UserAvatar({ user, size = 7 }) {
 export default function Navbar() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -118,13 +113,18 @@ export default function Navbar() {
 
   const displayName = user?.displayName || user?.email?.split("@")[0] || "Profile";
 
+  async function handleLogout() {
+    await signOut();
+    navigate("/");
+  }
+
   const navBg = scrolled
     ? "linear-gradient(to right, rgba(240,233,255,0.66) 0%, rgba(233,241,255,0.66) 100%)"
     : "linear-gradient(to right, rgba(240,233,255,0.88) 0%, rgba(233,241,255,0.88) 100%)";
 
   return (
     <motion.nav
-      className="sticky top-0 z-50 border-b transition-all duration-300"
+      className="fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300"
       animate={{
         borderColor: scrolled ? "rgba(124,58,237,0.18)" : "rgba(124,58,237,0.10)",
         boxShadow: scrolled ? "0 4px 24px rgba(0,0,0,0.10), 0 1px 0 rgba(124,58,237,0.08)" : "0 1px 8px rgba(0,0,0,0.06)",
@@ -242,26 +242,39 @@ export default function Navbar() {
                 onMouseLeave={e => { e.currentTarget.style.background = "rgba(37,99,235,0.14)"; }}
               >
                 <Users size={13} strokeWidth={1.6} />
-                Healthcare Pro
+                Healthcare Professional
               </Link>
             </motion.div>
 
             {/* Auth-conditional */}
             {user ? (
-              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
-                <Link
-                  to={`/profile/${user.uid}`}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all duration-200"
-                  style={{ background: "rgba(124,58,237,0.12)", border: "1px solid rgba(124,58,237,0.3)" }}
-                  onMouseEnter={e => { e.currentTarget.style.background = "rgba(124,58,237,0.22)"; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = "rgba(124,58,237,0.12)"; }}
+              <>
+                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+                  <Link
+                    to={`/profile/${user.uid}`}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all duration-200"
+                    style={{ background: "rgba(124,58,237,0.12)", border: "1px solid rgba(124,58,237,0.3)" }}
+                    onMouseEnter={e => { e.currentTarget.style.background = "rgba(124,58,237,0.22)"; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = "rgba(124,58,237,0.12)"; }}
+                  >
+                    <UserAvatar user={user} size={6} />
+                    <span className="text-xs font-semibold max-w-[80px] truncate" style={{ color: "#7C3AED" }}>
+                      {displayName}
+                    </span>
+                  </Link>
+                </motion.div>
+                <motion.button
+                  whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.95 }}
+                  onClick={handleLogout}
+                  title="Sign out"
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200"
+                  style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.22)", color: "#EF4444" }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,0.15)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "rgba(239,68,68,0.08)"; }}
                 >
-                  <UserAvatar user={user} size={6} />
-                  <span className="text-xs font-semibold max-w-[80px] truncate" style={{ color: "#7C3AED" }}>
-                    {displayName}
-                  </span>
-                </Link>
-              </motion.div>
+                  <LogOut size={13} strokeWidth={1.6} />
+                </motion.button>
+              </>
             ) : (
               <>
                 <motion.div
@@ -269,17 +282,19 @@ export default function Navbar() {
                   whileTap={{ scale: 0.96 }}
                 >
                   <Link to="/join"
+                    state={{ from: location.pathname }}
                     className="text-xs font-semibold px-4 py-1.5 rounded-lg text-white transition-all duration-300"
                     style={{ background: "linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)" }}
                     onMouseEnter={e => { e.currentTarget.style.background = "linear-gradient(135deg, #6D28D9 0%, #1D4ED8 100%)"; }}
                     onMouseLeave={e => { e.currentTarget.style.background = "linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)"; }}
                   >
-                    Join the Movement
+                    Sign Up
                   </Link>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.95 }}>
                   <Link
                     to="/sign-in"
+                    state={{ from: location.pathname }}
                     className="flex items-center gap-1 text-xs font-semibold transition-colors duration-200"
                     style={{ color: "#5B21B6" }}
                     onMouseEnter={e => { e.currentTarget.style.color = "#2563EB"; }}
@@ -355,19 +370,28 @@ export default function Navbar() {
                 <Users size={14} /> Healthcare Professional
               </Link>
               {user ? (
-                <Link to={`/profile/${user.uid}`} onClick={() => setMenuOpen(false)}
-                  className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold"
-                  style={{ background: "rgba(124,58,237,0.12)", border: "1px solid rgba(124,58,237,0.28)", color: "#7C3AED" }}>
-                  <UserAvatar user={user} size={6} /> {displayName}
-                </Link>
+                <>
+                  <Link to={`/profile/${user.uid}`} onClick={() => setMenuOpen(false)}
+                    className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold"
+                    style={{ background: "rgba(124,58,237,0.12)", border: "1px solid rgba(124,58,237,0.28)", color: "#7C3AED" }}>
+                    <UserAvatar user={user} size={6} /> {displayName}
+                  </Link>
+                  <button
+                    onClick={() => { setMenuOpen(false); handleLogout(); }}
+                    className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold"
+                    style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.22)", color: "#EF4444" }}
+                  >
+                    <LogOut size={14} strokeWidth={1.6} /> Sign Out
+                  </button>
+                </>
               ) : (
                 <>
-                  <Link to="/join" onClick={() => setMenuOpen(false)}
+                  <Link to="/join" state={{ from: location.pathname }} onClick={() => setMenuOpen(false)}
                     className="py-2.5 rounded-xl text-sm font-semibold text-white text-center"
                     style={{ background: "linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)" }}>
-                    Join the Movement
+                    Sign Up
                   </Link>
-                  <Link to="/sign-in" onClick={() => setMenuOpen(false)}
+                  <Link to="/sign-in" state={{ from: location.pathname }} onClick={() => setMenuOpen(false)}
                     className="flex items-center justify-center gap-2 text-sm font-semibold text-gray-700 py-2.5 rounded-xl border border-purple-200/60 transition-all duration-200"
                     onMouseEnter={e => { e.currentTarget.style.color = "#7C3AED"; }}
                     onMouseLeave={e => { e.currentTarget.style.color = "#374151"; }}

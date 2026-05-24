@@ -1,6 +1,7 @@
 import { Link, Outlet } from 'react-router-dom';
 import { GamificationProvider } from '../../context/GamificationContext';
 import PortalNavbar from './PortalNavbar';
+import FloatingParticles from './FloatingParticles';
 
 function LinkedInIcon() {
   return (
@@ -27,9 +28,17 @@ const SITE_LINKS = [
 export default function PortalLayout() {
   return (
     <GamificationProvider>
-      <div className="min-h-screen portal-scroll" style={{ background: '#07071a' }}>
+      <div className="min-h-screen portal-scroll" style={{ background: '#07071a', position: 'relative' }}>
+        <div
+          className="fixed inset-0 pointer-events-none overflow-hidden"
+          style={{ zIndex: 0, opacity: 0.45 }}
+          aria-hidden="true"
+        >
+          <FloatingParticles purple />
+        </div>
+        <div style={{ position: 'relative', zIndex: 1 }}>
         <PortalNavbar />
-        <main>
+        <main className="pt-16">
           <Outlet />
         </main>
 
@@ -40,7 +49,7 @@ export default function PortalLayout() {
               <div>
                 <p className="text-white font-bold text-base mb-2 tracking-tight">AntiResist</p>
                 <p className="text-slate-500 text-xs leading-relaxed max-w-[200px]">
-                  Patient education portal on antibiotic resistance. For awareness only — always consult a healthcare professional.
+                  Patient education portal on antibiotic resistance. For awareness only. Always consult a healthcare professional.
                 </p>
               </div>
               <div>
@@ -84,6 +93,7 @@ export default function PortalLayout() {
             </div>
           </div>
         </footer>
+        </div>
       </div>
     </GamificationProvider>
   );

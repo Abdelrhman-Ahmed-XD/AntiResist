@@ -178,7 +178,7 @@ export default function Footer() {
 
             <p className="text-sm leading-relaxed max-w-sm mb-5" style={{ color: "#6B7280" }}>
               A healthcare awareness campaign dedicated to promoting rational antibiotic
-              use and combating antimicrobial resistance across Egypt — one prescription at a time.
+              use and combating antimicrobial resistance across Egypt  one prescription at a time.
             </p>
 
             <DevelopedBy />

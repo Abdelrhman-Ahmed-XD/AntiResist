@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/config";
@@ -19,9 +19,16 @@ export function AuthProvider({ children }) {
         // Skip Firestore on token refreshes for the same user
         if (firebaseUser.uid !== checkedUid.current) {
           checkedUid.current = firebaseUser.uid;
-          // Admins are stored as /admins/{uid}  one read, no collection scan
-          const snap = await getDoc(doc(db, "admins", firebaseUser.uid));
-          setIsAdmin(snap.exists());
+          try {
+            // Race against a 4-second timeout in case Firestore rules block the read
+            const snap = await Promise.race([
+              getDoc(doc(db, "admins", firebaseUser.uid)),
+              new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), 4000)),
+            ]);
+            setIsAdmin(snap.exists());
+          } catch {
+            setIsAdmin(false);
+          }
         }
       } else {
         checkedUid.current = null;
@@ -34,8 +41,19 @@ export function AuthProvider({ children }) {
     return unsubscribe;
   }, []);
 
+  const refreshUser = useCallback(() => {
+    const u = auth.currentUser;
+    if (!u) return;
+    // Object.create preserves the Firebase User prototype (keeps getIdToken, reload, etc.)
+    // Object.assign copies all own properties (uid, photoURL, displayName, stsTokenManager…)
+    // Result: a new reference React sees as changed, but still a real Firebase User-like object
+    const fresh = Object.create(Object.getPrototypeOf(u));
+    Object.assign(fresh, u);
+    setUser(fresh);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, isAdmin, loading }}>
+    <AuthContext.Provider value={{ user, isAdmin, loading, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

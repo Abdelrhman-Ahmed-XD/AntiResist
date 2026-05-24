@@ -1,60 +1,142 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-hot-toast";
 import { Loader2, Save, ArrowLeft } from "lucide-react";
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
+import HomeParticles from "../components/sections/HomeParticles";
 import { useAuth } from "../context/AuthContext";
-import { getSupporter, updateSupporter } from "../firebase/firestore";
+import { updateDisplayName } from "../firebase/auth";
+import { auth } from "../firebase/config";
+import { getSupporter, updateSupporter, addSupporter, createUserProfile, updateUserProfile } from "../firebase/firestore";
 
 const SPECIALTIES = [
-  "Doctor",
-  "Pharmacist",
-  "Nurse",
-  "Medical Student",
-  "Pharmacy Student",
-  "Other",
+  "Doctor", "Pharmacist", "Nurse", "Medical Student", "Pharmacy Student", "Other",
 ];
 
-const EMPTY = { name: "", specialty: "", workplace: "", comment: "" };
+function StyledInput({ hasError, style: extStyle = {}, className = "", ...props }) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <input
+      className={`w-full px-4 py-3 rounded-xl text-sm bg-white outline-none transition-all duration-150 placeholder:text-gray-400 text-gray-900 ${className}`}
+      style={{
+        border: `1.5px solid ${hasError ? "#EF4444" : focused ? "#7C3AED" : "rgba(124,58,237,0.22)"}`,
+        boxShadow: focused && !hasError ? "0 0 0 3px rgba(124,58,237,0.10)" : "none",
+        ...extStyle,
+      }}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      {...props}
+    />
+  );
+}
+
+function StyledSelect({ hasError, children, ...props }) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <select
+      className="w-full px-4 py-3 rounded-xl text-sm bg-white outline-none transition-all duration-150 text-gray-900 cursor-pointer"
+      style={{
+        border: `1.5px solid ${hasError ? "#EF4444" : focused ? "#7C3AED" : "rgba(124,58,237,0.22)"}`,
+        boxShadow: focused && !hasError ? "0 0 0 3px rgba(124,58,237,0.10)" : "none",
+        appearance: "auto",
+      }}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      {...props}
+    >
+      {children}
+    </select>
+  );
+}
+
+function StyledTextarea({ hasError, ...props }) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <textarea
+      className="w-full px-4 py-3 rounded-xl text-sm bg-white outline-none transition-all duration-150 placeholder:text-gray-400 text-gray-900 resize-none"
+      style={{
+        border: `1.5px solid ${hasError ? "#EF4444" : focused ? "#7C3AED" : "rgba(124,58,237,0.22)"}`,
+        boxShadow: focused && !hasError ? "0 0 0 3px rgba(124,58,237,0.10)" : "none",
+      }}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      {...props}
+    />
+  );
+}
+
+function Field({ label, hint, error, children }) {
+  return (
+    <div>
+      <div className="flex items-baseline justify-between mb-1.5">
+        <label className="text-sm font-semibold text-gray-700">{label}</label>
+        {hint && <span className="text-xs text-gray-400">{hint}</span>}
+      </div>
+      {children}
+      <AnimatePresence>
+        {error && (
+          <motion.p
+            key={error}
+            initial={{ opacity: 0, y: -4, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: "auto" }}
+            exit={{ opacity: 0, y: -4, height: 0 }}
+            transition={{ duration: 0.18 }}
+            className="text-xs mt-1.5 font-medium overflow-hidden"
+            style={{ color: "#EF4444" }}
+          >
+            {error}
+          </motion.p>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export default function EditProfile() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [docId,   setDocId]   = useState(null);
-  const [form,    setForm]    = useState(EMPTY);
-  const [errors,  setErrors]  = useState({});
-  const [fetching, setFetching] = useState(true);
-  const [saving,  setSaving]  = useState(false);
+  const [docId,     setDocId]     = useState(null);
+  const [name,      setName]      = useState("");
+  const [specialty, setSpecialty] = useState("");
+  const [workplace, setWorkplace] = useState("");
+  const [comment,   setComment]   = useState("");
+  const [errors,    setErrors]    = useState({});
+  const [fetching,  setFetching]  = useState(true);
+  const [saving,    setSaving]    = useState(false);
 
-  // Load existing supporter data
   useEffect(() => {
     if (!user) return;
-    getSupporter(user.uid)
+    let done = false;
+    const timer = setTimeout(() => { if (!done) { done = true; setFetching(false); } }, 5000);
+
+    Promise.race([
+      getSupporter(user.uid),
+      new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 4800)),
+    ])
       .then((data) => {
-        if (data) {
+        if (!done && data) {
           setDocId(data.id);
-          setForm({
-            name:      data.name      ?? "",
-            specialty: data.specialty ?? "",
-            workplace: data.workplace ?? "",
-            comment:   data.comment   ?? "",
-          });
+          setName(data.name ?? "");
+          setSpecialty(data.specialty ?? "");
+          setWorkplace(data.workplace ?? "");
+          setComment(data.comment ?? "");
         }
       })
-      .finally(() => setFetching(false));
+      .catch(() => {})
+      .finally(() => { done = true; clearTimeout(timer); setFetching(false); });
   }, [user]);
 
-  function set(field, value) {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
+  function clr(field) {
+    if (errors[field]) setErrors(prev => ({ ...prev, [field]: "" }));
   }
 
   function validate() {
     const e = {};
-    if (!form.name.trim()) e.name      = "Full name is required.";
-    if (!form.specialty)   e.specialty = "Please select your specialty.";
+    if (!name.trim()) e.name      = "Full name is required.";
+    if (!specialty)   e.specialty = "Please select your specialty.";
     return e;
   }
 
@@ -62,20 +144,36 @@ export default function EditProfile() {
     evt.preventDefault();
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
-    if (!docId) { toast.error("Profile document not found."); return; }
 
     setSaving(true);
     try {
-      await updateSupporter(docId, {
-        name:      form.name.trim(),
-        specialty: form.specialty,
-        workplace: form.workplace.trim(),
-        comment:   form.comment.trim(),
-      });
+      const payload = {
+        name:      name.trim(),
+        specialty,
+        workplace: workplace.trim(),
+        comment:   comment.trim(),
+      };
+
+      if (docId) {
+        await updateSupporter(docId, payload);
+      } else {
+        const ref = await addSupporter(user.uid, payload);
+        setDocId(ref?.id ?? null);
+      }
+
+      // Keep userProfiles in sync (name used for certificate; setDoc+merge creates if absent)
+      await updateUserProfile(user.uid, { name: payload.name, specialty: payload.specialty });
+      // Always use auth.currentUser — context user may be a prototype copy without getIdToken
+      if (auth.currentUser) await updateDisplayName(auth.currentUser, payload.name);
+
       toast.success("Profile updated.");
       navigate(`/profile/${user.uid}`);
-    } catch {
-      toast.error("Failed to save. Please try again.");
+    } catch (err) {
+      console.error("EditProfile save error:", err?.code, err?.message);
+      const msg = err?.code === "permission-denied"
+        ? "Permission denied — Firestore rules may not be deployed yet."
+        : err?.message || "Failed to save. Please try again.";
+      toast.error(msg, { duration: 5000 });
     } finally {
       setSaving(false);
     }
@@ -85,9 +183,12 @@ export default function EditProfile() {
     return (
       <>
         <Navbar />
-        <main className="bg-bg min-h-screen flex items-center justify-center">
-          <Loader2 size={32} className="animate-spin text-teal" />
-        </main>
+        <div className="relative" style={{ overflowX: "clip", minHeight: "100vh" }}>
+          <HomeParticles repel={false} />
+          <div className="relative z-10 flex items-center justify-center" style={{ minHeight: "100vh" }}>
+            <Loader2 size={32} className="animate-spin text-purple-500" />
+          </div>
+        </div>
         <Footer />
       </>
     );
@@ -96,124 +197,122 @@ export default function EditProfile() {
   return (
     <>
       <Navbar />
-      <main className="bg-bg min-h-screen py-16">
-        <div className="max-w-lg mx-auto px-4">
-
-          {/* Back link */}
-          <button
-            onClick={() => navigate(`/profile/${user.uid}`)}
-            className="flex items-center gap-1.5 text-sm text-secondary hover:text-dark mb-6 transition-colors"
+      <div className="relative" style={{ overflowX: "clip", minHeight: "100vh" }}>
+        <HomeParticles repel={false} />
+        <div className="relative z-10 py-28 px-4 flex justify-center">
+          <motion.div
+            className="w-full max-w-lg"
+            initial={{ opacity: 0, y: 36, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
-            <ArrowLeft size={15} strokeWidth={1.5} />
-            Back to profile
-          </button>
+            {/* Back link */}
+            <button
+              onClick={() => navigate(`/profile/${user?.uid}`)}
+              className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-purple-600 mb-5 transition-colors duration-200"
+            >
+              <ArrowLeft size={15} strokeWidth={1.5} />
+              Back to profile
+            </button>
 
-          <div className="bg-white border border-gray-100 rounded-2xl shadow-sm overflow-hidden">
-
-            {/* Header */}
-            <div className="px-8 py-6 border-b border-gray-100">
-              <h1 className="text-xl font-semibold text-dark">Edit profile</h1>
-              <p className="text-sm text-secondary mt-1">
-                Changes are saved to your public supporter profile.
-              </p>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleSubmit} noValidate className="px-8 py-8 space-y-5">
-
-              {/* Full name */}
-              <Field label="Full name" error={errors.name}>
-                <input
-                  type="text"
-                  placeholder="Dr. Ahmed Hassan"
-                  value={form.name}
-                  onChange={(e) => set("name", e.target.value)}
-                  className={inputCls(errors.name)}
-                />
-              </Field>
-
-              {/* Specialty */}
-              <Field label="Specialty" error={errors.specialty}>
-                <select
-                  value={form.specialty}
-                  onChange={(e) => set("specialty", e.target.value)}
-                  className={inputCls(errors.specialty) + " bg-white"}
-                >
-                  <option value="">Select your specialty…</option>
-                  {SPECIALTIES.map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
-              </Field>
-
-              {/* Workplace */}
-              <Field label="Workplace" hint="Optional" error={errors.workplace}>
-                <input
-                  type="text"
-                  placeholder="Hospital or institution name"
-                  value={form.workplace}
-                  onChange={(e) => set("workplace", e.target.value)}
-                  className={inputCls(errors.workplace)}
-                />
-              </Field>
-
-              {/* Comment */}
-              <Field label="Your message" hint="Optional shown on your public profile" error={errors.comment}>
-                <textarea
-                  rows={4}
-                  placeholder="Why does fighting AMR matter to you?"
-                  value={form.comment}
-                  onChange={(e) => set("comment", e.target.value)}
-                  className={inputCls(errors.comment) + " resize-none"}
-                />
-              </Field>
-
-              {/* Actions */}
-              <div className="flex items-center gap-3 pt-2">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-teal text-white text-sm font-medium rounded-xl hover:bg-teal/90 transition-colors disabled:opacity-60"
-                >
-                  {saving
-                    ? <Loader2 size={15} className="animate-spin" />
-                    : <Save size={15} strokeWidth={1.5} />}
-                  {saving ? "Saving…" : "Save changes"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigate(`/profile/${user.uid}`)}
-                  className="px-6 py-2.5 text-sm font-medium text-secondary hover:text-dark border border-gray-200 rounded-xl hover:border-gray-300 transition-colors"
-                >
-                  Cancel
-                </button>
+            <div
+              className="rounded-3xl overflow-hidden"
+              style={{
+                background: "rgba(255,255,255,0.88)",
+                backdropFilter: "blur(24px)",
+                WebkitBackdropFilter: "blur(24px)",
+                border: "1px solid rgba(124,58,237,0.18)",
+                boxShadow: "0 16px 56px rgba(124,58,237,0.18), 0 2px 12px rgba(0,0,0,0.06)",
+              }}
+            >
+              {/* Gradient header */}
+              <div
+                className="px-8 py-7"
+                style={{ background: "linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)" }}
+              >
+                <h1 className="text-2xl font-bold text-white mb-1 tracking-tight">Edit profile</h1>
+                <p className="text-white/75 text-sm leading-relaxed">
+                  Changes are saved to your public supporter profile.
+                </p>
               </div>
-            </form>
-          </div>
+
+              {/* Form */}
+              <form onSubmit={handleSubmit} noValidate className="px-8 py-8 space-y-5">
+
+                <Field label="Full name" error={errors.name}>
+                  <StyledInput
+                    type="text"
+                    placeholder="Dr. Ahmed Hassan"
+                    value={name}
+                    onChange={e => { setName(e.target.value); clr("name"); }}
+                    hasError={!!errors.name}
+                    autoComplete="name"
+                  />
+                </Field>
+
+                <Field label="Specialty" error={errors.specialty}>
+                  <StyledSelect
+                    value={specialty}
+                    onChange={e => { setSpecialty(e.target.value); clr("specialty"); }}
+                    hasError={!!errors.specialty}
+                  >
+                    <option value="">Select your specialty…</option>
+                    {SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
+                  </StyledSelect>
+                </Field>
+
+                <Field label="Workplace" hint="Optional" error={errors.workplace}>
+                  <StyledInput
+                    type="text"
+                    placeholder="Hospital or institution name"
+                    value={workplace}
+                    onChange={e => setWorkplace(e.target.value)}
+                    hasError={!!errors.workplace}
+                    autoComplete="organization"
+                  />
+                </Field>
+
+                <Field label="Your message" hint="Optional · shown on your public profile" error={errors.comment}>
+                  <StyledTextarea
+                    rows={4}
+                    placeholder="Why does fighting AMR matter to you?"
+                    value={comment}
+                    onChange={e => setComment(e.target.value)}
+                    hasError={!!errors.comment}
+                  />
+                </Field>
+
+                <div className="flex items-center gap-3 pt-1">
+                  <motion.button
+                    type="submit"
+                    disabled={saving}
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-60 disabled:cursor-not-allowed"
+                    style={{
+                      background: "linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)",
+                      boxShadow: "0 4px 20px rgba(124,58,237,0.38)",
+                    }}
+                    whileHover={!saving ? { scale: 1.015, boxShadow: "0 6px 28px rgba(124,58,237,0.48)" } : {}}
+                    whileTap={!saving ? { scale: 0.98 } : {}}
+                    transition={{ duration: 0.15 }}
+                  >
+                    {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} strokeWidth={1.5} />}
+                    {saving ? "Saving…" : "Save changes"}
+                  </motion.button>
+
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/profile/${user?.uid}`)}
+                    className="px-6 py-2.5 text-sm font-medium text-gray-500 hover:text-gray-800 border border-gray-200 hover:border-gray-300 rounded-xl transition-colors duration-200"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </motion.div>
         </div>
-      </main>
+      </div>
       <Footer />
     </>
   );
-}
-
-function Field({ label, hint, error, children }) {
-  return (
-    <div>
-      <div className="flex items-baseline justify-between mb-1.5">
-        <label className="text-sm font-medium text-dark">{label}</label>
-        {hint && <span className="text-xs text-secondary">{hint}</span>}
-      </div>
-      {children}
-      {error && <p className="text-xs text-danger mt-1">{error}</p>}
-    </div>
-  );
-}
-
-function inputCls(hasError) {
-  return [
-    "w-full px-4 py-2.5 rounded-xl border text-sm text-dark placeholder:text-gray-400",
-    "focus:outline-none focus:ring-2 focus:ring-teal/30 focus:border-teal transition-colors",
-    hasError ? "border-danger" : "border-gray-200",
-  ].join(" ");
 }

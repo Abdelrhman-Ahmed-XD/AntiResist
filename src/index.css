@@ -8,18 +8,36 @@
   box-sizing: border-box;
 }
 
+html {
+  /* scroll-behavior only — overflow-x: hidden on html/body breaks position:sticky/fixed */
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   font-family: "Inter", system-ui, sans-serif;
   background: linear-gradient(to right, #D4BCFF 0%, #B8D0FF 100%);
-  background-attachment: fixed;
+  background-size: cover;
+  min-height: 100vh;
   color: #1A2233;
   -webkit-font-smoothing: antialiased;
+  /* overflow-x is managed per-container so it never breaks fixed/sticky */
+}
+
+/* Fixed gradient background layer — avoids the iOS white-rect scroll bug
+   that background-attachment:fixed causes on mobile */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(to right, #D4BCFF 0%, #B8D0FF 100%);
+  pointer-events: none;
 }
 
 #root {
   min-height: 100vh;
-  animation: rootFadeIn 0.20s ease-out both;
+  animation: rootFadeIn 0.35s ease-out both;
 }
 @keyframes rootFadeIn {
   from { opacity: 0; }

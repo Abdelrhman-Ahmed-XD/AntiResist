@@ -7,13 +7,13 @@ const INFECTIONS = {
     label: 'Uncomplicated UTI', severe: false,
     empirical: {
       mild:     ['Nitrofurantoin 100 mg MR BD × 5 days', 'Trimethoprim 200 mg BD × 3 days', 'Fosfomycin 3 g single dose'],
-      moderate: ['Same as mild — check local antibiogram for TMP resistance', 'Pivmecillinam 400 mg TDS × 3–5 days (if available)'],
-      severe:   ['Consider IV if unable to tolerate oral — escalate to Complicated UTI pathway'],
+      moderate: ['Same as mild, check local antibiogram for TMP resistance', 'Pivmecillinam 400 mg TDS × 3–5 days (if available)'],
+      severe:   ['Consider IV if unable to tolerate oral, escalate to Complicated UTI pathway'],
     },
     stewardship: [
       'Send MSU for culture and sensitivity before starting antibiotics',
-      'Avoid fluoroquinolones — reserve for complicated cases only',
-      'Short-course therapy preferred (3–5 days) — longer courses unnecessary',
+      'Avoid fluoroquinolones, reserve for complicated cases only',
+      'Short-course therapy preferred (3–5 days),longer courses unnecessary',
       'De-escalate or stop based on culture/sensitivity results',
       'No imaging or further investigation needed for uncomplicated presentations',
     ],
@@ -56,28 +56,28 @@ const INFECTIONS = {
     warnings: [
       'Add MRSA coverage (vancomycin/linezolid) if: post-influenza, cavitary lesion, known MRSA colonisation',
       'Consider influenza (oseltamivir) in appropriate seasonal context',
-      'Avoid dual beta-lactam therapy — no added benefit',
+      'Avoid dual beta-lactam therapy, no added benefit',
     ],
   },
   'sepsis': {
     label: 'Sepsis / Septic Shock', severe: true,
     empirical: {
-      mild:     ['Not applicable — all sepsis is an emergency requiring urgent IV therapy'],
+      mild:     ['Not applicable, all sepsis is an emergency requiring urgent IV therapy'],
       moderate: ['IV Piperacillin-Tazobactam 4.5 g Q6h + Vancomycin 25–30 mg/kg loading dose (if MRSA risk)'],
       severe:   ['Meropenem 1 g Q8h + Vancomycin (MRSA risk) ± Micafungin/Caspofungin (Candida risk)', 'Consider Anidulafungin if hepatically compromised'],
     },
     stewardship: [
-      '🚨 START ANTIBIOTICS WITHIN 1 HOUR of sepsis recognition — do not delay for cultures',
+      '🚨 START ANTIBIOTICS WITHIN 1 HOUR of sepsis recognition, do not delay for cultures',
       'Draw 2 sets of blood cultures from separate sites BEFORE first antibiotic dose',
-      'Daily clinical reassessment for de-escalation — reassess empirical MRSA/antifungal coverage at 48 h',
-      'Use Procalcitonin (PCT) to guide antibiotic duration — target <0.5 µg/L or 80% reduction',
+      'Daily clinical reassessment for de-escalation, reassess empirical MRSA/antifungal coverage at 48 h',
+      'Use Procalcitonin (PCT) to guide antibiotic duration, target <0.5 µg/L or 80% reduction',
       'Target 7–10 days total; individualise based on clinical response and organism',
     ],
     warnings: [
-      '⚠ This is a medical emergency — broad-spectrum empirical antibiotics are appropriate initially',
-      'Mandatory de-escalation once culture data available — do not continue carbapenem unnecessarily',
-      'Monitor for nephrotoxicity with vancomycin — AUC-guided TDM mandatory',
-      'Review antifungal need at 72 h — stop if cultures negative and no clinical indication',
+      '⚠ This is a medical emergency, broad-spectrum empirical antibiotics are appropriate initially',
+      'Mandatory de-escalation once culture data available, do not continue carbapenem unnecessarily',
+      'Monitor for nephrotoxicity with vancomycin, AUC-guided TDM mandatory',
+      'Review antifungal need at 72 h, stop if cultures negative and no clinical indication',
     ],
   },
   'ssti': {
@@ -89,15 +89,15 @@ const INFECTIONS = {
     },
     stewardship: [
       'Mark cellulitis borders with pen and document at presentation to monitor spread',
-      'Aspirate or drain purulent collections — culture pus, not surrounding skin',
+      'Aspirate or drain purulent collections, culture pus, not surrounding skin',
       'Assess for MRSA risk factors: prior MRSA, nasal carriage, IVDU, close contact with MRSA',
-      'Duration: 5 days for mild-moderate — extend only with demonstrated clinical need',
+      'Duration: 5 days for mild-moderate, extend only with demonstrated clinical need',
       'Surgical referral if crepitus, rapid progression, systemic sepsis, or bullae present',
     ],
     warnings: [
-      '🔴 Necrotising fasciitis requires IMMEDIATE surgical debridement + broad IV antibiotics — do not delay surgery',
+      '🔴 Necrotising fasciitis requires IMMEDIATE surgical debridement + broad IV antibiotics, do not delay surgery',
       'Group A Strep toxic shock: add IV clindamycin to blunt toxin production even with penicillin',
-      'Diabetic foot: cover Gram-negative + anaerobic organisms — consider MRSA if chronic wound',
+      'Diabetic foot: cover Gram-negative + anaerobic organisms, consider MRSA if chronic wound',
     ],
   },
   'intra-abdominal': {
@@ -108,10 +108,10 @@ const INFECTIONS = {
       severe:   ['IV Meropenem 1 g Q8h + IV Metronidazole (hospital-acquired / post-operative)', 'Add Fluconazole 400 mg OD if Candida risk (TPN, prior antifungals, perforated peptic ulcer)'],
     },
     stewardship: [
-      'Source control is ESSENTIAL and is the primary treatment — antibiotics are adjunctive only',
+      'Source control is ESSENTIAL and is the primary treatment, antibiotics are adjunctive only',
       'Drain, debride, or operate before or simultaneously with antibiotic initiation',
       'Collect intraoperative samples (peritoneal fluid/tissue) for culture',
-      'Duration: 4–7 days after adequate source control — longer courses NOT supported by evidence',
+      'Duration: 4–7 days after adequate source control, longer courses NOT supported by evidence',
       'Stop antibiotics at 4 days post-source control if clinical improvement confirmed',
     ],
     warnings: [
@@ -285,7 +285,7 @@ export default function StewardshipTool() {
                     <div className="flex items-center gap-3 p-4 rounded-xl"
                       style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.35)' }}>
                       <ShieldAlert size={18} style={{ color: '#EF4444' }} />
-                      <span className="text-red-300 text-sm font-semibold">Medical Emergency — Initiate antibiotics within 1 hour</span>
+                      <span className="text-red-300 text-sm font-semibold">Medical Emergency, Initiate antibiotics within 1 hour</span>
                     </div>
                   )}
 
@@ -294,7 +294,7 @@ export default function StewardshipTool() {
                     style={{ background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)', backdropFilter: 'blur(20px)' }}>
                     <div className="flex items-center gap-2 mb-4">
                       <Pill size={16} style={{ color: '#10B981' }} />
-                      <span className="text-emerald-300 font-semibold text-sm">Empirical Options — {severity.charAt(0).toUpperCase() + severity.slice(1)}</span>
+                      <span className="text-emerald-300 font-semibold text-sm">Empirical Options,{severity.charAt(0).toUpperCase() + severity.slice(1)}</span>
                     </div>
                     <ul className="space-y-2">
                       {data.empirical[severity].map((opt, i) => (

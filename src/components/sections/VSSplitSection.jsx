@@ -1,15 +1,13 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 import {
   Stethoscope, ShieldCheck, Brain, Activity,
   Heart, BookOpen, ChevronRight, Microscope,
 } from 'lucide-react';
 
-const fadeLeft  = { hidden: { opacity: 0, x: -48 }, show: { opacity: 1, x: 0, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] } } };
-const fadeRight = { hidden: { opacity: 0, x:  48 }, show: { opacity: 1, x: 0, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] } } };
-const fadeUp    = { hidden: { opacity: 0, y: 24  }, show: { opacity: 1, y: 0, transition: { duration: 0.55 } } };
-const stagger   = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
+const VP   = { once: true, amount: 0.08 };
+const ease = [0.22, 1, 0.36, 1];
 
 const PATIENT_LINKS = [
   { icon: Heart,     label: 'What is AMR?',      href: '/portal#amr-info' },
@@ -55,17 +53,17 @@ const HCP = {
   ctaShadow:    '0 4px 20px rgba(37,99,235,0.36)',
 };
 
-function PortalCard({ theme, badgeText, title, subtitle, desc, links, ctaLabel, ctaTo, ghostLabel, ghostTo, variants, scale, isHovered, onHoverStart, onHoverEnd }) {
+function PortalCard({ theme, badgeText, title, subtitle, desc, links, ctaLabel, ctaTo, ghostLabel, ghostTo, scale, isHovered, onHoverStart, onHoverEnd, animStyle }) {
   const t = theme;
 
   return (
     <motion.div
-      variants={variants}
       className="flex-1 rounded-3xl p-8 flex flex-col gap-6 min-h-[480px] cursor-default bg-white"
       style={{
         border:      isHovered ? t.hoverBorder : t.borderColor,
         boxShadow:   isHovered ? t.hoverShadow : t.shadow,
-        transition: 'all 0.35s ease',
+        transition: 'border 0.35s ease, box-shadow 0.35s ease',
+        ...animStyle,
       }}
       animate={{ scale }}
       transition={{ type: 'spring', stiffness: 260, damping: 28 }}
@@ -142,10 +140,13 @@ function PortalCard({ theme, badgeText, title, subtitle, desc, links, ctaLabel, 
 }
 
 export default function VSSplitSection() {
-  /* 'patient' | 'hcp' | null */
   const [hovered, setHovered] = useState(null);
 
-  /* VS bubble color and scale based on which card is hovered */
+  const headerRef = useRef(null);
+  const cardsRef  = useRef(null);
+  const headerInView = useInView(headerRef, VP);
+  const cardsInView  = useInView(cardsRef,  VP);
+
   const vsBg = hovered === 'patient'
     ? 'linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%)'
     : hovered === 'hcp'
@@ -163,18 +164,25 @@ export default function VSSplitSection() {
   const hcpScale     = hovered === 'patient' ? 0.96 : 1;
 
   return (
-    <section className="py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <section id="portals" className="py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
       <div className="max-w-7xl mx-auto">
 
         {/* Section label */}
-        <motion.div
-          initial="hidden" whileInView="show" viewport={{ once: true }} variants={stagger}
-          className="flex flex-col items-center text-center mb-14"
-        >
-          <motion.p variants={fadeUp} className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">
+        <div ref={headerRef} className="flex flex-col items-center text-center mb-14">
+          <motion.p
+            className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3"
+            initial={{ opacity: 0, y: 20 }}
+            animate={headerInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.5, ease }}
+          >
             Choose Your Path
           </motion.p>
-          <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+          <motion.h2
+            className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight"
+            initial={{ opacity: 0, y: 20 }}
+            animate={headerInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.5, ease, delay: headerInView ? 0.08 : 0 }}
+          >
             One Platform,{' '}
             <span
               className="text-transparent bg-clip-text"
@@ -183,24 +191,25 @@ export default function VSSplitSection() {
               Two Portals
             </span>
           </motion.h2>
-          <motion.p variants={fadeUp} className="text-gray-500 text-sm mt-3 max-w-xl">
+          <motion.p
+            className="text-gray-500 text-sm mt-3 max-w-xl"
+            initial={{ opacity: 0, y: 20 }}
+            animate={headerInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            transition={{ duration: 0.5, ease, delay: headerInView ? 0.16 : 0 }}
+          >
             Whether you're a patient seeking guidance or a clinician optimising therapy, AntiResist has a dedicated experience for you.
           </motion.p>
-        </motion.div>
+        </div>
 
         {/* Split layout */}
-        <motion.div
-          className="flex flex-col lg:flex-row items-stretch gap-0 lg:gap-0"
-          initial="hidden" whileInView="show" viewport={{ once: true }} variants={stagger}
-        >
+        <div ref={cardsRef} className="flex flex-col lg:flex-row items-stretch gap-0 lg:gap-0">
           {/* Patient card */}
           <PortalCard
-            variants={fadeLeft}
             theme={PATIENT}
             badgeText="For Patients & Public"
             title="Patient Portal"
-            subtitle="Education · Awareness · Self-Care"
-            desc="Learn about antibiotics and AMR, test your knowledge with interactive quizzes, debunk myths, and get personalized guidance — all in plain language."
+            subtitle="Education · Awareness · Self Care"
+            desc="Learn about antibiotics and AMR, test your knowledge with interactive quizzes, debunk myths, and get personalized guidance in plain language."
             links={PATIENT_LINKS}
             ctaLabel="Enter Patient Portal"
             ctaTo="/portal"
@@ -210,6 +219,11 @@ export default function VSSplitSection() {
             isHovered={hovered === 'patient'}
             onHoverStart={() => setHovered('patient')}
             onHoverEnd={() => setHovered(null)}
+            animStyle={{
+              opacity: cardsInView ? 1 : 0,
+              transform: cardsInView ? 'translateX(0)' : 'translateX(-48px)',
+              transition: 'opacity 0.65s cubic-bezier(0.22,1,0.36,1), transform 0.65s cubic-bezier(0.22,1,0.36,1)',
+            }}
           />
 
           {/* VS divider */}
@@ -238,7 +252,6 @@ export default function VSSplitSection() {
 
           {/* HCP card */}
           <PortalCard
-            variants={fadeRight}
             theme={HCP}
             badgeText="For Healthcare Professionals"
             title="Healthcare Professional"
@@ -253,8 +266,13 @@ export default function VSSplitSection() {
             isHovered={hovered === 'hcp'}
             onHoverStart={() => setHovered('hcp')}
             onHoverEnd={() => setHovered(null)}
+            animStyle={{
+              opacity: cardsInView ? 1 : 0,
+              transform: cardsInView ? 'translateX(0)' : 'translateX(48px)',
+              transition: 'opacity 0.65s cubic-bezier(0.22,1,0.36,1) 0.1s, transform 0.65s cubic-bezier(0.22,1,0.36,1) 0.1s',
+            }}
           />
-        </motion.div>
+        </div>
       </div>
     </section>
   );

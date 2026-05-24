@@ -8,7 +8,7 @@ const CATEGORIES = [
   { label: 'Respiratory',        color: 'text-blue-400',   symptoms: ['Cough', 'Dry cough', 'Productive cough', 'Sore throat', 'Runny nose', 'Nasal congestion', 'Sneezing', 'Shortness of breath'] },
   { label: 'Gastrointestinal',   color: 'text-amber-400',  symptoms: ['Diarrhea', 'Vomiting', 'Abdominal pain'] },
   { label: 'Urinary',            color: 'text-cyan-400',   symptoms: ['Burning urination', 'Frequent urination', 'Lower abdominal pain (urinary)'] },
-  { label: 'Severe — Red Flags', color: 'text-red-400', urgent: true,
+  { label: 'Severe Red Flags', color: 'text-red-400', urgent: true,
     symptoms: ['Difficulty breathing', 'Chest pain', 'Persistent high fever', 'Symptoms lasting >7 days', 'Confusion', 'Severe dehydration'] },
 ];
 
@@ -27,7 +27,7 @@ function evaluate(selected) {
   if (bacterialIndicators.some(f => s.has(f))) return {
     level: 'warning', icon: Activity,
     title: 'Medical Evaluation Recommended',
-    message: 'Some of your symptoms may suggest a bacterial infection requiring diagnosis and possibly antibiotics — but only a healthcare professional can determine that.',
+    message: 'Some of your symptoms may suggest a bacterial infection requiring diagnosis and possibly antibiotics, but only a healthcare professional can determine that.',
     advice: ['Consult a doctor or pharmacist as soon as possible.', 'Do not self-medicate with antibiotics.', 'Bring a list of your symptoms and their duration to the appointment.'],
     borderColor: 'border-yellow-500/60', bgColor: 'bg-yellow-950/40', titleColor: 'text-yellow-400',
     badgeColor: 'bg-yellow-900/60 text-yellow-300', glowColor: 'rgba(234,179,8,0.3)',
@@ -35,9 +35,9 @@ function evaluate(selected) {
   const viralIndicators = ['runny nose', 'sneezing', 'dry cough', 'sore throat', 'fever', 'nasal congestion', 'fatigue', 'body aches', 'chills'];
   if (viralIndicators.some(f => s.has(f))) return {
     level: 'viral', icon: Info,
-    title: 'Likely Viral Infection — Antibiotics Not Indicated',
+    title: 'Likely Viral Infection: Antibiotics Not Indicated',
     message: 'Your selected symptoms are consistent with a viral illness. Antibiotics are ineffective against viruses and will not help you recover faster.',
-    advice: ['Rest and stay well-hydrated.', 'Use over-the-counter symptom relief as appropriate.', 'Monitor your condition — consult a doctor if symptoms worsen or persist beyond 7 days.'],
+    advice: ['Rest and stay well-hydrated.', 'Use over-the-counter symptom relief as appropriate.', 'Monitor your condition and consult a doctor if symptoms worsen or persist beyond 7 days.'],
     borderColor: 'border-emerald-500/60', bgColor: 'bg-emerald-950/40', titleColor: 'text-emerald-400',
     badgeColor: 'bg-emerald-900/60 text-emerald-300', glowColor: 'rgba(52,211,153,0.3)',
   };

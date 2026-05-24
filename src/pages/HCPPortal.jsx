@@ -1,9 +1,11 @@
+import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Stethoscope, ShieldCheck, Activity, ChevronRight, Brain, TrendingUp, FlaskConical, Microscope } from 'lucide-react';
-import ShieldScene  from '../components/portal/ShieldScene';
-import HCPDashboard from '../components/hcp/HCPDashboard';
-import AWaReSection from '../components/hcp/AWaReSection';
+import ShieldScene      from '../components/portal/ShieldScene';
+import FloatingParticles from '../components/portal/FloatingParticles';
+import HCPDashboard    from '../components/hcp/HCPDashboard';
+import AWaReSection    from '../components/hcp/AWaReSection';
 
 const STATS = [
   { icon: Activity,     value: '700k+', label: 'AMR deaths / year globally',            color: '#EF4444' },
@@ -19,18 +21,20 @@ const FEATURES = [
   { icon: Microscope,  title: 'Egypt Resistance Trends',desc: 'Pathogen-antibiotic resistance rates from Egyptian AMR surveillance', href: '/hcp/trends' },
 ];
 
-const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
-const fadeUp  = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.5 } } };
+const stagger  = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
+const fadeUp   = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.5 } } };
 const shieldIn = {
   hidden: { opacity: 0, scale: 0.9, x: 24 },
   show:   { opacity: 1, scale: 1, x: 0, transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1], delay: 0.12 } },
 };
 
 export default function HCPPortal() {
+  const sectionRef = useRef(null);
+
   return (
     <>
       {/* ── HERO ── */}
-      <section id="hcp-hero" className="relative min-h-screen flex flex-col overflow-hidden">
+      <section ref={sectionRef} id="hcp-hero" className="relative min-h-screen flex flex-col overflow-hidden">
 
         {/* Background */}
         <div className="absolute inset-0 pointer-events-none">
@@ -43,6 +47,9 @@ export default function HCPPortal() {
               'radial-gradient(ellipse 50% 60% at 20% 65%, rgba(16,185,129,0.10) 0%, transparent 55%)',
           }} />
         </div>
+
+        {/* Mouse-reactive floating pills + bacteria */}
+        <FloatingParticles containerRef={sectionRef} />
 
         {/* 2-column hero — text left, shield right */}
         <div className="relative flex-1 flex items-center max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-16 pt-24 lg:py-10 lg:pt-20">
@@ -144,13 +151,13 @@ export default function HCPPortal() {
         </div>
       </section>
 
-      {/* ── Dashboard cards ── */}
-      <HCPDashboard />
-
-      {/* ── AWaRe section (Learn) ── */}
+      {/* ── AWaRe section (Prescribe Smarter, Not Broader) ── */}
       <div className="border-t border-blue-900/30" style={{ background: 'rgba(7,7,26,0.4)' }}>
         <AWaReSection />
       </div>
+
+      {/* ── Dashboard cards (All Stewardship Resources) ── */}
+      <HCPDashboard />
     </>
   );
 }

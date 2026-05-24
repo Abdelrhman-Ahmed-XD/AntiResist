@@ -92,7 +92,7 @@ export default function ForgotPassword() {
         className="relative flex items-center justify-center px-4"
         style={{ overflowX: "clip", minHeight: "100vh", paddingTop: "6rem", paddingBottom: "6rem" }}
       >
-        <HomeParticles />
+        <HomeParticles repel={false} />
         <motion.div
           className="relative z-10 w-full max-w-md"
           initial={{ opacity: 0, y: 36, scale: 0.97 }}

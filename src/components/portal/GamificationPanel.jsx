@@ -1,53 +1,45 @@
-import { useState } from 'react';
-import { Zap, Lock, Award, Download, User, LogIn } from 'lucide-react';
+import { Zap, Lock, Award, Download, LogIn } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useGamification } from '../../context/GamificationContext';
 import { useAuth } from '../../hooks/useAuth';
 
-function openCertificate(name, date) {
-  const html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<title>AMR Stewardship Certificate</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter', sans-serif; background: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
-  .cert { width: 800px; padding: 60px; border: 3px solid #7C3AED; border-radius: 24px; text-align: center; position: relative; background: #fff; }
-  .cert::before { content: ''; position: absolute; inset: 10px; border: 1px solid #E9D5FF; border-radius: 16px; pointer-events: none; }
-  .logo { font-size: 13px; font-weight: 700; color: #7C3AED; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 36px; }
-  .badge { font-size: 52px; margin-bottom: 12px; }
-  .this-certifies { font-size: 13px; color: #9CA3AF; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; }
-  .name { font-size: 44px; font-weight: 900; color: #1F2937; margin-bottom: 16px; border-bottom: 2px solid #E9D5FF; padding-bottom: 16px; }
-  .title { font-size: 22px; font-weight: 700; color: #7C3AED; margin-bottom: 16px; }
-  .desc { font-size: 14px; color: #6B7280; line-height: 1.8; max-width: 520px; margin: 0 auto 36px; }
-  .footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 36px; padding-top: 24px; border-top: 1px solid #F3F4F6; }
-  .sig-line { width: 160px; height: 1px; background: #D1D5DB; margin-bottom: 4px; }
-  .sig-name { font-size: 12px; color: #9CA3AF; }
-  .date { font-size: 12px; color: #9CA3AF; text-align: right; }
-  @media print { body { background: #fff; } }
-</style>
-</head>
-<body>
-<div class="cert">
-  <div class="logo">AntiResist · Patient Education Portal</div>
-  <div class="badge">🏆</div>
-  <div class="this-certifies">This certifies that</div>
-  <div class="name">${name || 'AMR Advocate'}</div>
-  <div class="title">Antibiotic Stewardship Supporter</div>
-  <div class="desc">Has successfully completed the AntiResist Patient Education Portal, demonstrating comprehensive understanding of antimicrobial resistance, responsible antibiotic use, and the principles of antibiotic stewardship.</div>
-  <div class="footer">
-    <div class="sig"><div class="sig-line"></div><div class="sig-name">AntiResist Team</div></div>
-    <div class="date">Issued: ${date}</div>
-  </div>
-</div>
-<script>window.onload = () => window.print();<\/script>
-</body>
-</html>`;
-  const win = window.open('', '_blank', 'width=900,height=700');
-  if (win) { win.document.write(html); win.document.close(); }
+async function downloadCertificate(name) {
+  const displayName = (name?.trim()) || 'AMR Advocate';
+
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  await new Promise((resolve, reject) => {
+    img.onload = resolve;
+    img.onerror = reject;
+    img.src = '/certificate.jpg';
+  });
+
+  const canvas = document.createElement('canvas');
+  canvas.width  = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0);
+
+  // Name overlay — centered, at ~38% from top (between "PROUDLY PRESENTED TO" line and body text)
+  const fontSize = Math.round(img.naturalHeight * 0.058);
+  ctx.font         = `700 ${fontSize}px 'Times New Roman', Georgia, serif`;
+  ctx.fillStyle    = '#1a3a5c';
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(displayName, img.naturalWidth / 2, img.naturalHeight * 0.405);
+
+  canvas.toBlob((blob) => {
+    const url = URL.createObjectURL(blob);
+    const a   = document.createElement('a');
+    a.href     = url;
+    a.download = 'AntiResist-Certificate.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 'image/png');
 }
 
 const badgeVariant = {
@@ -56,12 +48,11 @@ const badgeVariant = {
 };
 
 export default function GamificationPanel() {
-  const { points, badges, unlockedBadges, hasGoldBadge, nextBadge, userName, setUserName } = useGamification();
+  const { points, badges, unlockedBadges, hasGoldBadge, nextBadge, userName } = useGamification();
   const { user } = useAuth();
-  const [nameInput, setNameInput] = useState(userName);
+  const { pathname } = useLocation();
   const maxPoints = 75;
   const pct = Math.min((points / maxPoints) * 100, 100);
-  const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
   return (
     <section id="gamification" className="py-24 px-4 sm:px-6 lg:px-8">
@@ -93,13 +84,14 @@ export default function GamificationPanel() {
             <Lock size={16} className="text-slate-500 shrink-0" />
             <p className="text-slate-500 text-sm flex-1">
               Your points are not saved.{' '}
-              <Link to="/sign-in" className="text-slate-400 underline underline-offset-2 hover:text-purple-400 transition-colors duration-150">Sign in</Link>
+              <Link to="/sign-in" state={{ from: pathname }} className="text-slate-400 underline underline-offset-2 hover:text-purple-400 transition-colors duration-150">Sign in</Link>
               {' '}or{' '}
-              <Link to="/join" className="text-slate-400 underline underline-offset-2 hover:text-purple-400 transition-colors duration-150">create an account</Link>
+              <Link to="/join" state={{ from: pathname }} className="text-slate-400 underline underline-offset-2 hover:text-purple-400 transition-colors duration-150">create an account</Link>
               {' '}to save your progress and earn badges.
             </p>
             <Link
               to="/sign-in"
+              state={{ from: pathname }}
               className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 border border-slate-600/50 hover:border-purple-500/60 hover:text-purple-300 transition-all duration-200"
             >
               <LogIn size={12} />
@@ -278,7 +270,21 @@ export default function GamificationPanel() {
 
             {/* Certificate section */}
             <AnimatePresence>
-              {hasGoldBadge ? (
+              {hasGoldBadge && !user ? (
+                <motion.div
+                  key="cert-login"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="border-t border-purple-500/20 pt-6 overflow-hidden"
+                >
+                  <div className="flex items-center gap-3 p-4 rounded-xl bg-yellow-900/10 border border-yellow-500/30">
+                    <LogIn size={16} className="text-yellow-400 shrink-0" />
+                    <p className="text-yellow-300/80 text-xs flex-1">
+                      You earned the certificate! <Link to="/sign-in" state={{ from: pathname }} className="underline underline-offset-2 text-yellow-300 hover:text-white">Sign in</Link> to download it with your name.
+                    </p>
+                  </div>
+                </motion.div>
+              ) : hasGoldBadge ? (
                 <motion.div
                   key="cert"
                   initial={{ opacity: 0, height: 0 }}
@@ -290,34 +296,26 @@ export default function GamificationPanel() {
                     Download Your Certificate
                   </p>
                   <p className="text-slate-500 text-xs mb-4">
-                    Enter your name to generate a personalised Antibiotic Stewardship Supporter certificate.
+                    Your personalised Antibiotic Stewardship certificate is ready to download.
                   </p>
-                  <div className="flex gap-3">
-                    <div className="flex-1 relative">
-                      <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                      <input
-                        type="text"
-                        placeholder="Your full name"
-                        value={nameInput}
-                        onChange={e => { setNameInput(e.target.value); setUserName(e.target.value); }}
-                        className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10
-                          text-white text-sm placeholder-slate-600
-                          focus:outline-none focus:border-purple-500/60 transition-all duration-200"
-                      />
-                    </div>
-                    <motion.button
-                      onClick={() => openCertificate(nameInput, today)}
-                      whileHover={{ scale: 1.04, boxShadow: '0 0 24px rgba(234,179,8,0.5)' }}
-                      whileTap={{ scale: 0.96 }}
-                      className="px-5 py-2.5 rounded-xl font-semibold text-sm text-white
-                        bg-gradient-to-r from-yellow-600 to-amber-500
-                        whitespace-nowrap flex items-center gap-2"
-                      style={{ boxShadow: '0 0 16px rgba(234,179,8,0.35)' }}
-                    >
-                      <Download size={14} />
-                      Download
-                    </motion.button>
-                  </div>
+                  {userName && (
+                    <p className="text-slate-400 text-xs mb-4">
+                      Certificate will be issued to:{' '}
+                      <span className="text-white font-semibold">{userName}</span>
+                    </p>
+                  )}
+                  <motion.button
+                    onClick={() => downloadCertificate(userName || user?.displayName)}
+                    whileHover={{ scale: 1.04, boxShadow: '0 0 24px rgba(234,179,8,0.5)' }}
+                    whileTap={{ scale: 0.96 }}
+                    className="w-full py-3 rounded-xl font-semibold text-sm text-white
+                      bg-gradient-to-r from-yellow-600 to-amber-500
+                      flex items-center justify-center gap-2"
+                    style={{ boxShadow: '0 0 16px rgba(234,179,8,0.35)' }}
+                  >
+                    <Download size={14} />
+                    Download Certificate
+                  </motion.button>
                 </motion.div>
               ) : (
                 <motion.div

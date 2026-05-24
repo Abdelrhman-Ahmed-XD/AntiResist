@@ -13,7 +13,8 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <div className="relative" style={{ overflowX: "clip" }}>
+      {/* pt-16 offsets the fixed navbar (h-16 = 64 px) */}
+      <div className="relative pt-16" style={{ overflowX: "clip" }}>
         <HomeParticles />
         <div className="relative z-10">
           <main>
@@ -22,8 +23,8 @@ export default function Home() {
             <RationalUse />
             <Impact />
             <HowToHelp />
-            <SDGSection />
             <VSSplitSection />
+            <SDGSection />
           </main>
           <Footer />
         </div>

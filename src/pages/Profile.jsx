@@ -1,37 +1,55 @@
-import { useEffect, useState } from "react";
-import { Link, useParams, useNavigate } from "react-router-dom";
-import { Building2, Calendar, Pencil, AlertCircle, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Link, useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { Building2, Calendar, Pencil, AlertCircle, Loader2, Camera, LogOut, ShieldCheck, Download } from "lucide-react";
+import { toast } from "react-hot-toast";
+import { motion } from "framer-motion";
+import { updateProfile } from "firebase/auth";
 import Navbar from "../components/common/Navbar";
 import Footer from "../components/common/Footer";
+import HomeParticles from "../components/sections/HomeParticles";
 import SpecialtyBadge from "../components/common/SpecialtyBadge";
-import { getSupporter } from "../firebase/firestore";
+import { getSupporter, updateSupporter, updateUserProfile, getUserProfile } from "../firebase/firestore";
 import { useAuth } from "../context/AuthContext";
+import { signOut } from "../firebase/auth";
+import { uploadToCloudinary } from "../lib/cloudinaryUpload";
+import { auth } from "../firebase/config";
+
+async function downloadCertificate(name, filename = "AntiResist-Certificate.png") {
+  const displayName = name?.trim() || "AMR Advocate";
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; img.src = "/certificate.jpg"; });
+  const canvas = document.createElement("canvas");
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(img, 0, 0);
+  const fontSize = Math.round(img.naturalHeight * 0.058);
+  ctx.font = `700 ${fontSize}px 'Times New Roman', Georgia, serif`;
+  ctx.fillStyle = "#1a3a5c";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(displayName, img.naturalWidth / 2, img.naturalHeight * 0.405);
+  canvas.toBlob((blob) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
+  }, "image/png");
+}
 
 const AVATAR_COLORS = {
-  Doctor:             "bg-primary",
-  Pharmacist:         "bg-teal",
+  Doctor:             "bg-violet-600",
+  Pharmacist:         "bg-indigo-500",
   Nurse:              "bg-purple-500",
-  "Medical Student":  "bg-amber-400",
-  "Pharmacy Student": "bg-amber-400",
-  Other:              "bg-gray-400",
-};
-
-const COVER_COLORS = {
-  Doctor:             "from-primary/80 to-primary",
-  Pharmacist:         "from-teal/80 to-teal",
-  Nurse:              "from-purple-500/80 to-purple-600",
-  "Medical Student":  "from-amber-400/80 to-amber-500",
-  "Pharmacy Student": "from-amber-400/80 to-amber-500",
-  Other:              "from-gray-400/80 to-gray-500",
+  "Medical Student":  "bg-blue-500",
+  "Pharmacy Student": "bg-blue-500",
+  Other:              "bg-slate-500",
 };
 
 function initials(name = "") {
-  return name
-    .split(" ")
-    .slice(0, 2)
-    .map((w) => w[0] ?? "")
-    .join("")
-    .toUpperCase();
+  return name.split(" ").slice(0, 2).map((w) => w[0] ?? "").join("").toUpperCase();
 }
 
 function formatDate(createdAt) {
@@ -40,37 +58,97 @@ function formatDate(createdAt) {
   return d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 }
 
+function aboutText(name, specialty) {
+  const first = name?.split(" ")[0] || name || "This user";
+  if (["Doctor", "Pharmacist", "Nurse"].includes(specialty)) {
+    return `${first} is a ${specialty.toLowerCase()} on the AntiResist platform, dedicated to antimicrobial stewardship and responsible antibiotic use in clinical practice.`;
+  }
+  if (specialty === "Medical Student") {
+    return `${first} is a medical student using AntiResist to build a strong foundation in antimicrobial resistance and evidence-based prescribing.`;
+  }
+  if (specialty === "Pharmacy Student") {
+    return `${first} is a pharmacy student using AntiResist to deepen their understanding of antimicrobial resistance and rational drug use.`;
+  }
+  return `${first} is part of the AntiResist community, learning about antimicrobial resistance and promoting the responsible use of antibiotics.`;
+}
+
 export default function Profile() {
   const { uid } = useParams();
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
+  const [searchParams] = useSearchParams();
+  const fromCtx = searchParams.get("from"); // "portal" | "hcp" | null
+  const { user, loading: authLoading, refreshUser } = useAuth();
 
-  const [supporter, setSupporter] = useState(null);
-  const [fetching, setFetching]   = useState(true);
-  const [notFound, setNotFound]   = useState(false);
+  const [supporter,    setSupporter]    = useState(null);
+  const [fetching,     setFetching]     = useState(true);
+  const [notFound,     setNotFound]     = useState(false);
+  const [uploading,    setUploading]    = useState(false);
+  const [userProfile,  setUserProfile]  = useState(null);
+  const fileInputRef = useRef(null);
 
   const isOwner = !authLoading && user?.uid === uid;
 
   useEffect(() => {
+    if (!authLoading && user?.uid === uid) {
+      getUserProfile(uid).then(setUserProfile).catch(() => {});
+    }
+  }, [uid, user, authLoading]);
+
+  useEffect(() => {
     setFetching(true);
     setNotFound(false);
+    let done = false;
+    const timer = setTimeout(() => {
+      if (!done) { done = true; setNotFound(true); setFetching(false); }
+    }, 5000);
     getSupporter(uid)
-      .then((data) => {
-        if (!data) setNotFound(true);
-        else setSupporter(data);
-      })
-      .catch(() => setNotFound(true))
-      .finally(() => setFetching(false));
+      .then((data) => { if (!done) { done = true; if (!data) setNotFound(true); else setSupporter(data); } })
+      .catch(() => { if (!done) { done = true; setNotFound(true); } })
+      .finally(() => { clearTimeout(timer); setFetching(false); });
   }, [uid]);
+
+  async function handleLogout() {
+    await signOut();
+    navigate(fromCtx === "portal" ? "/portal" : fromCtx === "hcp" ? "/hcp" : "/");
+  }
+
+  async function handlePhotoUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("Please select an image file."); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5 MB."); return; }
+
+    setUploading(true);
+    try {
+      const preset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+      const { secure_url: photoURL } = await uploadToCloudinary(file, preset, "profile-pictures", uid);
+      await Promise.all([
+        updateProfile(auth.currentUser, { photoURL }),
+        supporter?.id && updateSupporter(supporter.id, { photoURL }),
+        updateUserProfile(uid, { photoURL }),
+      ]);
+      setSupporter((prev) => ({ ...prev, photoURL }));
+      refreshUser();
+      toast.success("Profile photo updated.");
+    } catch (err) {
+      toast.error(err.message || "Upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  }
+
 
   // ── Loading ──────────────────────────────────────────────────────────────────
   if (fetching || authLoading) {
     return (
       <>
         <Navbar />
-        <main className="bg-bg min-h-screen flex items-center justify-center">
-          <Loader2 size={32} className="animate-spin text-teal" />
-        </main>
+        <div className="relative" style={{ overflowX: "clip", minHeight: "100vh" }}>
+          <HomeParticles repel={false} />
+          <div className="relative z-10 flex items-center justify-center" style={{ minHeight: "100vh" }}>
+            <Loader2 size={32} className="animate-spin text-purple-500" />
+          </div>
+        </div>
         <Footer />
       </>
     );
@@ -78,126 +156,255 @@ export default function Profile() {
 
   // ── Not found ────────────────────────────────────────────────────────────────
   if (notFound) {
+    const isIncomplete = !authLoading && user?.uid === uid;
+    const gradBtn = { background: "linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)" };
+
     return (
       <>
         <Navbar />
-        <main className="bg-bg min-h-screen flex items-center justify-center px-4">
-          <div className="text-center max-w-sm">
-            <AlertCircle size={40} strokeWidth={1.5} className="text-secondary mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-dark mb-2">Profile not found</h2>
-            <p className="text-secondary text-sm mb-6">
-              This supporter profile doesn't exist or may have been removed.
-            </p>
-            <button
-              onClick={() => navigate("/")}
-              className="px-6 py-2.5 bg-teal text-white rounded-full text-sm font-medium hover:bg-teal/90 transition-colors"
+        <div className="relative" style={{ overflowX: "clip", minHeight: "100vh" }}>
+          <HomeParticles repel={false} />
+          <div className="relative z-10 flex items-center justify-center px-4" style={{ minHeight: "100vh" }}>
+            <motion.div
+              className="text-center max-w-sm"
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
             >
-              Back to home
-            </button>
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
+                style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(124,58,237,0.3)" }}>
+                <AlertCircle size={28} className="text-purple-400" />
+              </div>
+              <h2 className="text-xl font-bold text-white mb-2">
+                {isIncomplete ? "Complete your profile" : "Profile not found"}
+              </h2>
+              <p className="text-sm mb-6 text-slate-400">
+                {isIncomplete
+                  ? "Your account was created but your profile details are missing."
+                  : "This profile doesn't exist or may have been removed."}
+              </p>
+              {isIncomplete ? (
+                <Link to="/profile/edit"
+                  className="inline-block px-6 py-2.5 rounded-full text-sm font-semibold text-white"
+                  style={gradBtn}>
+                  Complete profile
+                </Link>
+              ) : (
+                <button onClick={() => navigate(fromCtx === "portal" ? "/portal" : fromCtx === "hcp" ? "/hcp" : "/")}
+                  className="px-6 py-2.5 rounded-full text-sm font-semibold text-white"
+                  style={gradBtn}>
+                  Go back
+                </button>
+              )}
+            </motion.div>
           </div>
-        </main>
+        </div>
         <Footer />
       </>
     );
   }
 
+  // ── Profile data ─────────────────────────────────────────────────────────────
+  const photoURL    = supporter.photoURL || (isOwner ? user?.photoURL : null);
   const avatarColor = AVATAR_COLORS[supporter.specialty] ?? AVATAR_COLORS.Other;
-  const coverGrad   = COVER_COLORS[supporter.specialty]  ?? COVER_COLORS.Other;
   const joinedDate  = formatDate(supporter.createdAt);
 
+  // ── Profile ───────────────────────────────────────────────────────────────────
   return (
     <>
       <Navbar />
-      <main className="bg-bg min-h-screen pb-20">
+      <div className="relative" style={{ overflowX: "clip", minHeight: "100vh" }}>
+        <HomeParticles repel={false} />
 
-        {/* Cover banner */}
-        <div className={`h-48 sm:h-60 bg-gradient-to-br ${coverGrad}`} />
-
-        <div className="max-w-2xl mx-auto px-4">
-
-          {/* Avatar + edit button row */}
-          <div className="flex items-end justify-between -mt-14 sm:-mt-16 mb-6">
+        <div className="relative z-10 py-28 px-4 flex justify-center">
+          <motion.div
+            className="w-full max-w-2xl"
+            initial={{ opacity: 0, y: 32, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {/* Glass card */}
             <div
-              className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full ring-4 ring-white flex items-center justify-center text-white text-3xl font-semibold flex-shrink-0 ${avatarColor}`}
+              className="rounded-3xl overflow-hidden"
+              style={{
+                background: "rgba(255,255,255,0.88)",
+                backdropFilter: "blur(24px)",
+                WebkitBackdropFilter: "blur(24px)",
+                border: "1px solid rgba(124,58,237,0.18)",
+                boxShadow: "0 16px 56px rgba(124,58,237,0.18), 0 2px 12px rgba(0,0,0,0.06)",
+              }}
             >
-              {initials(supporter.name)}
-            </div>
-
-            {isOwner && (
-              <Link
-                to="/profile/edit"
-                className="flex items-center gap-1.5 px-4 py-2 rounded-full border border-gray-200 text-sm font-medium text-dark hover:border-teal hover:text-teal transition-colors bg-white shadow-sm"
+              {/* ── Gradient header ── */}
+              <div
+                className="px-8 py-10 relative"
+                style={{ background: "linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)" }}
               >
-                <Pencil size={14} strokeWidth={1.5} />
-                Edit profile
-              </Link>
-            )}
-          </div>
+                <div className="flex flex-col sm:flex-row items-start gap-6">
 
-          {/* Name + badge */}
-          <h1 className="text-2xl sm:text-3xl font-semibold text-dark mb-2">
-            {supporter.name}
-          </h1>
-          <div className="mb-4">
-            <SpecialtyBadge specialty={supporter.specialty} />
-          </div>
+                  {/* Avatar */}
+                  <div className="relative shrink-0">
+                    {photoURL ? (
+                      <img src={photoURL} alt={supporter.name}
+                        className="w-24 h-24 sm:w-28 sm:h-28 rounded-full object-cover ring-4 ring-white/30" />
+                    ) : (
+                      <div className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center text-white text-3xl font-bold ring-4 ring-white/30 ${avatarColor}`}>
+                        {initials(supporter.name)}
+                      </div>
+                    )}
+                    {isOwner && (
+                      <>
+                        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+                        <button
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={uploading}
+                          className="absolute bottom-0 right-0 w-8 h-8 rounded-full flex items-center justify-center bg-white/90 hover:bg-white border border-white/60 shadow transition-all disabled:opacity-60"
+                          title="Change photo"
+                        >
+                          {uploading
+                            ? <Loader2 size={14} className="animate-spin text-purple-600" />
+                            : <Camera size={14} className="text-purple-600" />}
+                        </button>
+                      </>
+                    )}
+                  </div>
 
-          {/* Meta row */}
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-secondary mb-8">
-            {supporter.workplace && (
-              <span className="flex items-center gap-1.5">
-                <Building2 size={14} strokeWidth={1.5} />
-                {supporter.workplace}
-              </span>
-            )}
-            {joinedDate && (
-              <span className="flex items-center gap-1.5">
-                <Calendar size={14} strokeWidth={1.5} />
-                Joined {joinedDate}
-              </span>
-            )}
-          </div>
+                  {/* Name + meta */}
+                  <div className="flex-1 min-w-0">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2 leading-tight">
+                      {supporter.name}
+                    </h1>
+                    <div className="mb-3">
+                      <SpecialtyBadge specialty={supporter.specialty} light />
+                    </div>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-white/70">
+                      {supporter.workplace && (
+                        <span className="flex items-center gap-1.5">
+                          <Building2 size={13} strokeWidth={1.5} />
+                          {supporter.workplace}
+                        </span>
+                      )}
+                      {joinedDate && (
+                        <span className="flex items-center gap-1.5">
+                          <Calendar size={13} strokeWidth={1.5} />
+                          Joined {joinedDate}
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
-          {/* Quote card */}
-          {supporter.comment && (
-            <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 mb-6">
-              <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-3">
-                Their message
-              </p>
-              <blockquote className="text-dark italic leading-relaxed border-l-2 border-teal pl-4">
-                "{supporter.comment}"
-              </blockquote>
+                  {/* Actions */}
+                  {isOwner && (
+                    <div className="flex items-center gap-2 sm:self-start shrink-0">
+                      <Link
+                        to="/profile/edit"
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold bg-white/15 hover:bg-white/25 border border-white/30 text-white transition-all duration-200"
+                      >
+                        <Pencil size={13} strokeWidth={1.5} />
+                        Edit
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-semibold transition-all duration-200"
+                        style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.25)", color: "#FCA5A5" }}
+                      >
+                        <LogOut size={13} strokeWidth={1.5} />
+                        Sign Out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* ── Card content ── */}
+              <div className="px-8 py-8 space-y-6">
+
+                {/* Message */}
+                {supporter.comment && (
+                  <div className="p-5 rounded-2xl bg-purple-50 border border-purple-100">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-purple-400 mb-3">
+                      Their message
+                    </p>
+                    <blockquote className="italic leading-relaxed border-l-2 border-purple-400 pl-4 text-gray-700">
+                      "{supporter.comment}"
+                    </blockquote>
+                  </div>
+                )}
+
+                {/* About (replaces Commitment) */}
+                <div className="p-5 rounded-2xl bg-gray-50 border border-purple-100">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-purple-400 mb-3 flex items-center gap-1.5">
+                    <ShieldCheck size={13} strokeWidth={2} />
+                    About
+                  </p>
+                  <p className="text-sm leading-relaxed text-gray-700">
+                    {aboutText(supporter.name, supporter.specialty)}
+                  </p>
+                </div>
+
+                {/* Certificates — owner only */}
+                {isOwner && (userProfile?.points >= 60 || userProfile?.hcpScore >= 80) && (
+                  <div className="p-5 rounded-2xl" style={{ background: '#F9F5FF', border: '1px solid rgba(124,58,237,0.12)' }}>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-purple-400 mb-3 flex items-center gap-1.5">
+                      <Download size={13} strokeWidth={2} /> Your Certificates
+                    </p>
+                    <div className="flex flex-col gap-3">
+                      {userProfile?.points >= 60 && (
+                        <div className="flex items-center justify-between p-3 rounded-xl bg-purple-50 border border-purple-100">
+                          <div>
+                            <p className="text-gray-800 text-sm font-semibold">Patient Portal Certificate</p>
+                            <p className="text-gray-400 text-xs">Antibiotic Stewardship Supporter</p>
+                          </div>
+                          <motion.button
+                            whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+                            onClick={() => downloadCertificate(supporter.name || user?.displayName, "AntiResist-Certificate.png")}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white"
+                            style={{ background: 'linear-gradient(135deg, #7C3AED, #4F46E5)' }}>
+                            <Download size={12} /> Download
+                          </motion.button>
+                        </div>
+                      )}
+                      {userProfile?.hcpScore >= 80 && (
+                        <div className="flex items-center justify-between p-3 rounded-xl bg-blue-50 border border-blue-100">
+                          <div>
+                            <p className="text-gray-800 text-sm font-semibold">HCP Certificate</p>
+                            <p className="text-gray-400 text-xs">Expert Antimicrobial Steward</p>
+                          </div>
+                          <motion.button
+                            whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
+                            onClick={() => downloadCertificate(supporter.name || user?.displayName, "AntiResist-HCP-Certificate.png")}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white"
+                            style={{ background: 'linear-gradient(135deg, #1D4ED8, #0EA5E9)' }}>
+                            <Download size={12} /> Download
+                          </motion.button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Visitor CTA */}
+                {!isOwner && (
+                  <div className="pt-2 text-center">
+                    <p className="text-sm text-gray-400 mb-4">
+                      Want to track your AMR learning journey and earn badges?
+                    </p>
+                    <Link
+                      to="/join"
+                      className="inline-flex items-center gap-2 px-7 py-2.5 rounded-full text-sm font-semibold text-white transition-all duration-200"
+                      style={{
+                        background: "linear-gradient(135deg, #7C3AED 0%, #2563EB 100%)",
+                        boxShadow: "0 4px 14px rgba(124,58,237,0.35)",
+                      }}
+                    >
+                      Create an account
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
-          )}
-
-          {/* Commitment card */}
-          <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6">
-            <p className="text-xs font-semibold uppercase tracking-widest text-secondary mb-3">
-              Commitment
-            </p>
-            <p className="text-sm text-dark leading-relaxed">
-              <span className="font-semibold">{supporter.name}</span> has publicly committed to
-              promoting rational antibiotic use and fighting antimicrobial resistance as part of
-              the AntiResist campaign.
-            </p>
-          </div>
-
-          {/* CTA for visitors */}
-          {!isOwner && (
-            <div className="mt-8 text-center">
-              <p className="text-sm text-secondary mb-3">
-                Inspired by {supporter.name.split(" ")[0]}? Add your name to the movement.
-              </p>
-              <Link
-                to="/join"
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-teal text-white text-sm font-medium rounded-full hover:bg-teal/90 transition-colors"
-              >
-                Join AntiResist
-              </Link>
-            </div>
-          )}
+          </motion.div>
         </div>
-      </main>
+      </div>
       <Footer />
     </>
   );
