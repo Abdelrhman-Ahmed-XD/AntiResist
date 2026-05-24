@@ -14,34 +14,7 @@ import { signOut } from "../firebase/auth";
 import { uploadToCloudinary } from "../lib/cloudinaryUpload";
 import { auth } from "../firebase/config";
 
-// Pre-load at module level so the download click stays synchronous (mobile Chrome requires it)
-const _certImg = new Image();
-_certImg.src = "/certificate.jpg";
-
-function downloadCertificate(name, filename = "AntiResist-Certificate.png") {
-  if (!_certImg.complete || !_certImg.naturalWidth) return;
-  const displayName = name?.trim() || "AMR Advocate";
-
-  const canvas = document.createElement("canvas");
-  canvas.width = _certImg.naturalWidth;
-  canvas.height = _certImg.naturalHeight;
-  const ctx = canvas.getContext("2d");
-  ctx.drawImage(_certImg, 0, 0);
-  const fontSize = Math.round(_certImg.naturalHeight * 0.058);
-  ctx.font = `700 ${fontSize}px 'Times New Roman', Georgia, serif`;
-  ctx.fillStyle = "#1a3a5c";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(displayName, _certImg.naturalWidth / 2, _certImg.naturalHeight * 0.405);
-
-  const dataUrl = canvas.toDataURL("image/png");
-  const a = document.createElement("a");
-  a.href = dataUrl;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
+import { downloadCertificate } from "../lib/certificate";
 
 const AVATAR_COLORS = {
   Doctor:             "bg-violet-600",
@@ -360,7 +333,7 @@ export default function Profile() {
                           </div>
                           <motion.button
                             whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-                            onClick={() => downloadCertificate(supporter.name || user?.displayName, "AntiResist-Certificate.png")}
+                            onClick={() => downloadCertificate(supporter.name || user?.displayName, user?.uid, 'AntiResist-Certificate')}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white"
                             style={{ background: 'linear-gradient(135deg, #7C3AED, #4F46E5)' }}>
                             <Download size={12} /> Download
@@ -375,7 +348,7 @@ export default function Profile() {
                           </div>
                           <motion.button
                             whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
-                            onClick={() => downloadCertificate(supporter.name || user?.displayName, "AntiResist-HCP-Certificate.png")}
+                            onClick={() => downloadCertificate(supporter.name || user?.displayName, user?.uid, 'AntiResist-HCP-Certificate')}
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white"
                             style={{ background: 'linear-gradient(135deg, #1D4ED8, #0EA5E9)' }}>
                             <Download size={12} /> Download

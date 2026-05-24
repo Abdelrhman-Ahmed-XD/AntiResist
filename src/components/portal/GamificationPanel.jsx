@@ -3,36 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation } from 'react-router-dom';
 import { useGamification } from '../../context/GamificationContext';
 import { useAuth } from '../../hooks/useAuth';
-
-// Pre-load at module level so the download click stays synchronous (mobile Chrome requires it)
-const _certImg = new Image();
-_certImg.src = '/certificate.jpg';
-
-function downloadCertificate(name) {
-  if (!_certImg.complete || !_certImg.naturalWidth) return;
-  const displayName = (name?.trim()) || 'AMR Advocate';
-
-  const canvas = document.createElement('canvas');
-  canvas.width  = _certImg.naturalWidth;
-  canvas.height = _certImg.naturalHeight;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(_certImg, 0, 0);
-
-  const fontSize = Math.round(_certImg.naturalHeight * 0.058);
-  ctx.font         = `700 ${fontSize}px 'Times New Roman', Georgia, serif`;
-  ctx.fillStyle    = '#1a3a5c';
-  ctx.textAlign    = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(displayName, _certImg.naturalWidth / 2, _certImg.naturalHeight * 0.405);
-
-  const dataUrl = canvas.toDataURL('image/png');
-  const a = document.createElement('a');
-  a.href     = dataUrl;
-  a.download = 'AntiResist-Certificate.png';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
+import { downloadCertificate } from '../../lib/certificate';
 
 const badgeVariant = {
   hidden:   { opacity: 0, x: -18, scale: 0.94 },
@@ -297,7 +268,7 @@ export default function GamificationPanel() {
                     </p>
                   )}
                   <motion.button
-                    onClick={() => downloadCertificate(userName || user?.displayName)}
+                    onClick={() => downloadCertificate(userName || user?.displayName, user?.uid)}
                     whileHover={{ scale: 1.04, boxShadow: '0 0 24px rgba(234,179,8,0.5)' }}
                     whileTap={{ scale: 0.96 }}
                     className="w-full py-3 rounded-xl font-semibold text-sm text-white
