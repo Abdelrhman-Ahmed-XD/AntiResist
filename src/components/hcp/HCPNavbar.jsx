@@ -63,11 +63,13 @@ function NavShieldIcon() {
 }
 
 const NAV = [
-  { label: 'AWaRe',        href: '/hcp/aware'    },
-  { label: 'Quiz',         href: '/hcp/quiz'     },
-  { label: 'Support Tool', href: '/hcp/tool'     },
-  { label: 'Trends',       href: '/hcp/trends'   },
-  { label: 'My Progress',  href: '/hcp/progress' },
+  { label: 'AWaRe',        href: '/hcp/aware'       },
+  { label: 'Quiz',         href: '/hcp/quiz'        },
+  { label: 'Support Tool', href: '/hcp/tool'        },
+  { label: 'Trends',       href: '/hcp/trends'      },
+  { label: 'Infection',    href: '/hcp/infection'   },
+  { label: 'Prophylaxis',  href: '/hcp/prophylaxis' },
+  { label: 'My Progress',  href: '/hcp/progress'    },
 ];
 
 const mobileMenu = {

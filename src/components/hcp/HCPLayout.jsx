@@ -20,11 +20,13 @@ function FacebookIcon() {
 }
 
 const NAV = [
-  { label: 'AWaRe',        href: '/hcp/aware'    },
-  { label: 'Quiz',         href: '/hcp/quiz'     },
-  { label: 'Support Tool', href: '/hcp/tool'     },
-  { label: 'Trends',       href: '/hcp/trends'   },
-  { label: 'My Progress',  href: '/hcp/progress' },
+  { label: 'AWaRe',                   href: '/hcp/aware'       },
+  { label: 'Quiz',                    href: '/hcp/quiz'        },
+  { label: 'Support Tool',            href: '/hcp/tool'        },
+  { label: 'Trends',                  href: '/hcp/trends'      },
+  { label: 'Infection vs Colonization', href: '/hcp/infection' },
+  { label: 'Surgical Prophylaxis',    href: '/hcp/prophylaxis' },
+  { label: 'My Progress',             href: '/hcp/progress'    },
 ];
 
 export default function HCPLayout() {

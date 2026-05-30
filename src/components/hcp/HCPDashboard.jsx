@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ShieldCheck, Brain, Stethoscope, Microscope, ChevronRight } from 'lucide-react';
+import { ShieldCheck, Brain, Stethoscope, Microscope, ChevronRight, Activity, Shield } from 'lucide-react';
 
 const CARDS = [
   {
@@ -34,6 +34,22 @@ const CARDS = [
     href: '/hcp/trends',
     accent: '#F97316',
     badge: 'Epidemiology',
+  },
+  {
+    icon: Activity,
+    title: 'Infection vs Colonization',
+    desc: 'Clinical decision tool to evaluate culture results and determine infection vs colonization.',
+    href: '/hcp/infection',
+    accent: '#EF4444',
+    badge: 'Clinical Aid',
+  },
+  {
+    icon: Shield,
+    title: 'Surgical Prophylaxis',
+    desc: 'Evidence-based antimicrobial prophylaxis protocols for 7 procedure types.',
+    href: '/hcp/prophylaxis',
+    accent: '#10B981',
+    badge: 'Protocol',
   },
 ];
 
@@ -69,7 +85,7 @@ export default function HCPDashboard() {
         </motion.div>
 
         <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
           initial="hidden"
           whileInView="show"
           viewport={{ once: true }}

@@ -22,6 +22,8 @@ import SymptomsPage  from '../../pages/portal/SymptomsPage';
 import DrugsPage     from '../../pages/portal/DrugsPage';
 import ProgressPage  from '../../pages/portal/ProgressPage';
 
+import InteractionsPage from '../../pages/portal/InteractionsPage';
+
 import HCPLayout      from '../hcp/HCPLayout';
 import HCPPortal      from '../../pages/HCPPortal';
 import AWaRePage      from '../../pages/hcp/AWaRePage';
@@ -29,6 +31,8 @@ import HCPQuizPage    from '../../pages/hcp/HCPQuizPage';
 import ToolPage       from '../../pages/hcp/ToolPage';
 import TrendsPage     from '../../pages/hcp/TrendsPage';
 import HCPProgressPage from '../../pages/hcp/HCPProgressPage';
+import InfectionPage  from '../../pages/hcp/InfectionPage';
+import ProphylaxisPage from '../../pages/hcp/ProphylaxisPage';
 
 export default function AnimatedRoutes() {
   return (
@@ -50,8 +54,9 @@ export default function AnimatedRoutes() {
           <Route path="learn"    element={<LearnPage />} />
           <Route path="quiz"     element={<QuizPage />} />
           <Route path="symptoms" element={<SymptomsPage />} />
-          <Route path="drugs"    element={<DrugsPage />} />
-          <Route path="progress" element={<ProgressPage />} />
+          <Route path="drugs"        element={<DrugsPage />} />
+          <Route path="interactions" element={<InteractionsPage />} />
+          <Route path="progress"     element={<ProgressPage />} />
         </Route>
 
         <Route path="/hcp" element={<HCPLayout />}>
@@ -59,8 +64,10 @@ export default function AnimatedRoutes() {
           <Route path="aware"    element={<AWaRePage />} />
           <Route path="quiz"     element={<HCPQuizPage />} />
           <Route path="tool"     element={<ToolPage />} />
-          <Route path="trends"   element={<TrendsPage />} />
-          <Route path="progress" element={<HCPProgressPage />} />
+          <Route path="trends"      element={<TrendsPage />} />
+          <Route path="infection"   element={<InfectionPage />} />
+          <Route path="prophylaxis" element={<ProphylaxisPage />} />
+          <Route path="progress"    element={<HCPProgressPage />} />
         </Route>
 
         <Route element={<ProtectedRoute />}>

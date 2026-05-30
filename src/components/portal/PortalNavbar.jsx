@@ -83,11 +83,12 @@ function NavShieldIcon() {
 }
 
 const LINKS = [
-  { label: 'Learn',            href: '/portal/learn'    },
-  { label: 'Symptom Checker',  href: '/portal/symptoms' },
-  { label: 'Quiz',             href: '/portal/quiz'     },
-  { label: 'Drugs',            href: '/portal/drugs'    },
-  { label: 'Progress',         href: '/portal/progress' },
+  { label: 'Learn',            href: '/portal/learn'         },
+  { label: 'Symptom Checker',  href: '/portal/symptoms'      },
+  { label: 'Quiz',             href: '/portal/quiz'          },
+  { label: 'Drugs',            href: '/portal/drugs'         },
+  { label: 'Interactions',     href: '/portal/interactions'  },
+  { label: 'Progress',         href: '/portal/progress'      },
 ];
 
 const mobileMenu = {

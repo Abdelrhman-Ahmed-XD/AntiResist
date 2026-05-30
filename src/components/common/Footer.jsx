@@ -52,9 +52,12 @@ const NAV_SECTIONS = [
   {
     heading: "Portals",
     links: [
-      { label: "Patient Portal",          href: "/portal",  anchor: null },
-      { label: "Healthcare Professional", href: "/hcp",     anchor: null },
-      { label: "About Us",                href: "/about",   anchor: null },
+      { label: "Patient Portal",          href: "/portal",              anchor: null },
+      { label: "Drug Interactions",       href: "/portal/interactions", anchor: null },
+      { label: "Healthcare Professional", href: "/hcp",                 anchor: null },
+      { label: "Infection Tool",          href: "/hcp/infection",       anchor: null },
+      { label: "Surgical Prophylaxis",    href: "/hcp/prophylaxis",     anchor: null },
+      { label: "About Us",               href: "/about",               anchor: null },
     ],
   },
 ];

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BookOpen, Sparkles, Activity, Pill, Star, ChevronRight } from 'lucide-react';
+import { BookOpen, Sparkles, Activity, Pill, Star, ChevronRight, FlaskConical } from 'lucide-react';
 
 const CARDS = [
   {
@@ -38,6 +38,15 @@ const CARDS = [
     accent: '#22D3EE',
     glow: 'rgba(34,211,238,0.18)',
     badge: 'Reference',
+  },
+  {
+    icon: FlaskConical,
+    title: 'Drug Interactions',
+    desc: 'Instantly check clinically significant interactions between antibiotics and other medications.',
+    href: '/portal/interactions',
+    accent: '#8B5CF6',
+    glow: 'rgba(139,92,246,0.18)',
+    badge: 'Safety',
   },
   {
     icon: Star,

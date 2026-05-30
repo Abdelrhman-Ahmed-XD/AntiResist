@@ -20,10 +20,11 @@ function FacebookIcon() {
 }
 
 const PORTAL_LINKS = [
-  { label: 'What is AMR?',    href: '/portal/learn'    },
-  { label: 'Symptom Checker', href: '/portal/symptoms' },
-  { label: 'Drug Library',    href: '/portal/drugs'    },
-  { label: 'Your Progress',   href: '/portal/progress' },
+  { label: 'What is AMR?',      href: '/portal/learn'         },
+  { label: 'Symptom Checker',   href: '/portal/symptoms'      },
+  { label: 'Drug Library',      href: '/portal/drugs'         },
+  { label: 'Drug Interactions', href: '/portal/interactions'  },
+  { label: 'Your Progress',     href: '/portal/progress'      },
 ];
 
 const SITE_LINKS = [
